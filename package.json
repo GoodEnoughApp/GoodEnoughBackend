@@ -1,0 +1,22 @@
+{
+  "name": "cs-546-lab-6",
+  "version": "1.0.0",
+  "description": "This is solution to web programming lab-6 assignment",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Siddharth Gulati 10468179",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.6.2",
+    "express": "^4.17.1",
+    "mongodb": "^3.6.2",
+    "sequelize": "^6.16.1",
+    "sequelize-cockroachdb": "^6.0.5"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.4.1"
+  }
+}
