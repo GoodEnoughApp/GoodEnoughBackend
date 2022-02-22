@@ -4,9 +4,10 @@ require('dotenv').config();
 const app = express();
 const configRoutes = require('./routes');
 // const data = require('./data');
-
+const userModel = require('./models/index');
 app.use(express.json());
 
+// userModel['users'].findAll().then((data) => console.log(data));
 configRoutes(app);
 app.use(express.urlencoded({ extended: true }));
 app.listen(3000, () => {
