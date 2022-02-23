@@ -1,10 +1,10 @@
 const Sequelize = require('sequelize-cockroachdb');
 
 module.exports = (sequelize) => {
-    let User;
+    let verificationCode;
 
-    User = sequelize.define(
-        'users',
+    verificationCode = sequelize.define(
+        'verification_code',
         {
             id: {
                 type: Sequelize.UUID,
@@ -32,7 +32,7 @@ module.exports = (sequelize) => {
         }
     );
 
-    // User.associate = (models) => {};
+    // verificationCode.associate = (models) => {};
 
-    return User;
+    return verificationCode;
 };

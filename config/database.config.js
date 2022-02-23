@@ -1,5 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
+
 module.exports = {
     local: {
         dialect: 'postgres',
@@ -8,10 +9,10 @@ module.exports = {
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASS,
         port: process.env.DB_PORT,
-        logging: process.env.DB_LOGGING == 1 ? console.log : null,
+        logging: process.env.DB_LOGGING === 1 ? console.log : null,
         dialectOptions: {
             ssl: {
-                //For secure connection:
+                // For secure connection:
                 ca: fs
                     .readFileSync(`${__dirname}\\..\\certs\\cc-ca.crt`)
                     .toString(),
@@ -25,10 +26,10 @@ module.exports = {
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASS,
         port: process.env.DB_PORT,
-        logging: process.env.DB_LOGGING == 1 ? console.log : null,
+        logging: process.env.DB_LOGGING === 1 ? console.log : null,
         dialectOptions: {
             ssl: {
-                //For secure connection:
+                // For secure connection:
                 ca: fs
                     .readFileSync(`${__dirname}\\..\\certs\\cc-ca.crt`)
                     .toString(),
@@ -42,10 +43,10 @@ module.exports = {
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASS,
         port: process.env.DB_PORT,
-        logging: process.env.DB_LOGGING == 1 ? console.log : null,
+        logging: process.env.DB_LOGGING === 1 ? console.log : null,
         dialectOptions: {
             ssl: {
-                //For secure connection:
+                // For secure connection:
                 ca: fs
                     .readFileSync(`${__dirname}\\..\\certs\\cc-ca.crt`)
                     .toString(),

@@ -1,78 +1,94 @@
-// const express = require('express');
-// const router = express.Router();
-// const usersData = require('../data/users');
-// const valid = require('../public/js/validation');
+const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const userData = require('../data/users');
 
-// router.get('/register', async (req, res) => {
-//     // If user is authenticated then redirect to private
-//     // if (req.session.user) {
-//     //     res.redirect('/private');
-//     // } else {
-//     //     res.render('users/signup', { title: 'SignUp' });
-//     // }
-//     console.log('user authenticated!!');
-// });
+router.post('/register', async (req, res) => {
+  if (!req.body.name || !req.body.password || !req.body.email) {
+    res.status(422).json({
+      status: 'error',
+      message: 'Missing required values',
+      code: 'ERROR_MISSING_REQUIRED_VALUES',
+    });
+  }
+  if (userData.checkPassword(req.body.password)) {
+    res.status(422).json({
+      status: 'error',
+      message: 'Password less than 8 char.',
+      code: 'ERROR_MISSING_REQUIRED_VALUES',
+    });
+  }
+  const user = {
+    name: req.body.name,
+    password: req.body.password,
+    email: req.body.email,
+  };
+  try {
+    var check_duplication = await userData.checkEmail(user.email);
+    if (check_duplication) {
+      const hashedpassword = await bcrypt.hash(user.password, 10);
+      await userData.insertUser(user.name, user.email, hashedpassword, false);
+      res.status(201).json({
+        status: 'success',
+        message: 'Success',
+        code: 'Success',
+      });
+    } else {
+      res.status(409).json({
+        status: 'error',
+        message: 'The email already exist',
+        code: 'ERROR_EMAIL_EXIST',
+      });
+    }
+  } catch (e) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
+  }
+});
 
-// router.post('/register', async (req, res) => {
-//     try {
-//         let data = req.body;
-//         if (!data || data.email === '') throw `Please Provide email`;
-//         // valid.userNameValidation(data.username);
-//         if (!data || data.password === '') throw `Please Provide Password`;
-//         valid.passwordValidation(data.password);
-//         const { email, password } = data;
-//         try {
-//             let users = await usersData.createUser(email, password);
-//             // if (users.userInserted === true) {
-//             //     res.redirect('/');
-//             // } else {
-//             //     res.status(500).json({ error: 'Internal Server Error' });
-//             // }
-//             console.log(users);
-//         } catch (error) {
-//             res.status(500).json({ error: 'Internal Server Error' });
-//         }
-//     } catch (e) {
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// });
-
-// router.post('/login', async (req, res) => {
-//     try {
-//         let data = req.body;
-//         if (!data || data.username === '') throw `Please Provide Username`;
-//         valid.userNameValidation(data.username);
-//         if (!data || data.password === '') throw `Please Provide Password`;
-//         valid.passwordValidation(data.password);
-//         const { username, password } = data;
-//         try {
-//             let users = await usersData.checkUser(username, password);
-//             if (users.authenticated === true) {
-//                 req.session.user = username;
-//                 res.redirect('/private');
-//             }
-//         } catch (error) {
-//             res.status(400).render('users/login', {
-//                 error: error,
-//                 username: username,
-//                 password: password,
-//                 title: 'Login',
-//             });
-//         }
-//     } catch (e) {
-//         res.status(400).render('users/login', {
-//             error: e,
-//             username: req.body.username,
-//             password: req.body.password,
-//             title: 'Login',
-//         });
-//     }
-// });
-
-// router.get('/logout', async (req, res) => {
-//     req.session.destroy();
-//     res.clearCookie('AuthCookie');
-//     res.render('users/logout', { title: 'Logout' });
-// });
-
-// module.exports = router;
+router.post('/login', async (req, res) => {
+  try {
+    try {
+      let data = req.body;
+      if (!data || data.email === '') throw `Invalid or missing requirements`;
+      //   valid.userNameValidation(data.username);
+      if (!data || data.password === '')
+        throw `Invalid or missing requirements`;
+      //   valid.passwordValidation(data.password);
+    } catch (error) {
+      res.status(422).json({
+        status: 'error',
+        message: error,
+        code: 'ERROR_MISSING_REQUIRED_VALUES',
+      });
+    }
+    try {
+      const { email, password } = data;
+      let users = await usersData.checkUser(email, password);
+      if (users.authenticated === true) {
+        res.status(201).json({
+          status: 'success',
+          message: 'Success',
+          code: 'Success',
+        });
+      }
+    } catch (error) {
+      res.status(401).json({
+        status: 'error',
+        message: 'Invalid credentials',
+        code: 'ERROR_INVALID_CREDENTIALS',
+      });
+    }
+  } catch (e) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
+  }
+});
+module.exports = router;
