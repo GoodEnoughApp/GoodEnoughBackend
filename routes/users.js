@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -25,8 +26,8 @@ router.post('/register', async (req, res) => {
     email: req.body.email,
   };
   try {
-    var check_duplication = await userData.checkEmail(user.email);
-    if (check_duplication) {
+    const checkDuplication = await userData.checkEmail(user.email);
+    if (checkDuplication) {
       const hashedpassword = await bcrypt.hash(user.password, 10);
       await userData.insertUser(user.name, user.email, hashedpassword, false);
       res.status(201).json({
@@ -53,34 +54,47 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     try {
-      let data = req.body;
-      if (!data || data.email === '') throw `Invalid or missing requirements`;
-      //   valid.userNameValidation(data.username);
-      if (!data || data.password === '')
-        throw `Invalid or missing requirements`;
-      //   valid.passwordValidation(data.password);
+      if (!req.body || req.body.email === '' || req.body.password === '') {
+        throw new Error('Invalid or missing requirements');
+      }
+      userData.checkPassword(req.body.password);
     } catch (error) {
       res.status(422).json({
         status: 'error',
         message: error,
         code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
+      return;
     }
+    let users;
+    const { email, password } = req.body;
     try {
-      const { email, password } = data;
-      let users = await usersData.checkUser(email, password);
-      if (users.authenticated === true) {
-        res.status(201).json({
-          status: 'success',
-          message: 'Success',
-          code: 'Success',
+      users = await userData.checkUser(email, password);
+      if (!users.verified) {
+        res.status(401).json({
+          status: 'error',
+          message: 'Invalid or missing requirements',
+          code: 'ERROR_MISSING_REQUIRED_VALUES',
         });
+        return;
       }
     } catch (error) {
       res.status(401).json({
         status: 'error',
         message: 'Invalid credentials',
         code: 'ERROR_INVALID_CREDENTIALS',
+      });
+      return;
+    }
+    if (users.authenticated === true) {
+      const d = new Date();
+      let twoMonthsFromNow = d.setMonth(d.getMonth() + 2);
+      twoMonthsFromNow = new Date(twoMonthsFromNow).toISOString();
+      const authToken = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET);
+      res.status(201).json({
+        authToken: authToken,
+        expiredAt: twoMonthsFromNow,
+        status: 'success',
       });
     }
   } catch (e) {
