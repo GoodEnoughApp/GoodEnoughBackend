@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
   try {
     try {
       if (!req.body || req.body.email === '' || req.body.password === '') {
-        throw new Error('Invalid or missing requirements');
+        throw new Error('Missing required values');
       }
       userData.checkPassword(req.body.password);
     } catch (error) {
@@ -71,10 +71,10 @@ router.post('/login', async (req, res) => {
     try {
       users = await userData.checkUser(email, password);
       if (!users.verified) {
-        res.status(401).json({
+        res.status(409).json({
           status: 'error',
-          message: 'Invalid or missing requirements',
-          code: 'ERROR_MISSING_REQUIRED_VALUES',
+          message: 'This user account is not activated',
+          code: 'ERROR_IS_NOT_ACTIVATED',
         });
         return;
       }
@@ -91,7 +91,7 @@ router.post('/login', async (req, res) => {
       let twoMonthsFromNow = d.setMonth(d.getMonth() + 2);
       twoMonthsFromNow = new Date(twoMonthsFromNow).toISOString();
       const authToken = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET);
-      res.status(201).json({
+      res.status(200).json({
         authToken: authToken,
         expiredAt: twoMonthsFromNow,
         status: 'success',
