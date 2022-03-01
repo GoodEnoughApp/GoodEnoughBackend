@@ -51,6 +51,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// User Authentication using JWT
 router.post('/login', async (req, res) => {
   try {
     try {

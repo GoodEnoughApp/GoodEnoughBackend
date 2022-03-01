@@ -3,6 +3,7 @@ const auth = require('../middlewares/jwtAuth');
 const categoryData = require('../data/category');
 const router = express.Router();
 
+// Get list of all categories
 router.get('/', auth, async (req, res) => {
   try {
     const allCategory = await categoryData.getCategory();

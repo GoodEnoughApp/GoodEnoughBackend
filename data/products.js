@@ -5,6 +5,9 @@ require('dotenv').config();
 
 const baseURL = 'https://api.upcdatabase.org/product';
 
+/**
+ * This method is used to find product in user_product table using barcode as a param
+ */
 const findUserProductUsingBarcode = async (barcode) => {
   const userProduct = await models.user_product.findOne({
     where: {
@@ -18,6 +21,9 @@ const findUserProductUsingBarcode = async (barcode) => {
   }
 };
 
+/**
+ * This method is used to find product in product table using barcode as a param
+ */
 const findProductUsingBarcode = async (barcode) => {
   const product = await models.product.findOne({
     where: {
@@ -31,6 +37,9 @@ const findProductUsingBarcode = async (barcode) => {
   }
 };
 
+/**
+ * This method is used to find product in UPC database using barcode as a param
+ */
 const findUpcProductUsingBarcode = async (barcode) => {
   let url = `${baseURL}/${barcode}?apikey=${process.env.UPC_API_KEY}`;
   const upcProduct = await axios.get(url);
@@ -41,6 +50,13 @@ const findUpcProductUsingBarcode = async (barcode) => {
   }
 };
 
+/**
+ * This method is used to do an upsert using barcode
+ * The method first checks for prodcut in user_product table
+ * Found in user_product table ? return prodcut details(200) : check in product table
+ * Found in product table ? return product_id(201) : check in UPC database
+ * Found in UPC database ? insert category(if new) and insert result in product and user_product table and return record from user_product(201) : return product_id as null(201)
+ */
 const addProduct = async (barcode, decoded) => {
   const userProduct = await findUserProductUsingBarcode(barcode);
   if (userProduct.found) {
@@ -68,9 +84,7 @@ const addProduct = async (barcode, decoded) => {
       const upcProduct = await findUpcProductUsingBarcode(barcode);
       if (upcProduct.found) {
         const category = await categoryData.addCategory(
-          upcProduct.upcProduct.category != ''
-            ? upcProduct.upcProduct.category.toLowerCase()
-            : 'other'
+          upcProduct.upcProduct.category.toLowerCase()
         );
         const createdProduct = await createProductUsingUPC(
           upcProduct.upcProduct,
@@ -89,6 +103,9 @@ const addProduct = async (barcode, decoded) => {
   }
 };
 
+/**
+ * This method is used to insert record form UPC database into the product table
+ */
 const createProductUsingUPC = async (upcProduct, decoded, categoryId) => {
   try {
     const addedProduct = await models.product.findOrCreate({
@@ -111,6 +128,9 @@ const createProductUsingUPC = async (upcProduct, decoded, categoryId) => {
   }
 };
 
+/**
+ * This method is used to insert record from UPC databse to user_product table
+ */
 const createUserProductUsingUPC = async (
   upcProduct,
   decoded,
@@ -137,6 +157,9 @@ const createUserProductUsingUPC = async (
   }
 };
 
+/**
+ * This method is used to find product(s) in user_product table using categoryId as a param
+ */
 const getUserProducts = async (categoryId) => {
   if (!categoryId) {
     throw new Error('Invalid or missing requirements');
@@ -153,6 +176,9 @@ const getUserProducts = async (categoryId) => {
   }
 };
 
+/**
+ * This method is used to find product in user_product table using product_id as a param
+ */
 const getUserProductById = async (id) => {
   if (!id) {
     throw new Error('Invalid or missing requirements');

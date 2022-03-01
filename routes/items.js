@@ -3,20 +3,7 @@ const auth = require('../middlewares/jwtAuth');
 const itemsData = require('../data/items');
 const router = express.Router();
 
-/**
-router.put('/', auth, async (req, res) => {
-  try {
-    const { barcode } = req.body;
-    const addProduct = await productsData.addProduct(barcode);
-    if (addProduct.found) {
-      res.status(200).json({ product: addProduct.product });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error });
-  }
-});
-*/
-
+// To get item from item table based on product_id and used condition
 router.get('/', auth, async (req, res) => {
   try {
     if (req.query && req.query.used === 'true') {
@@ -43,6 +30,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// To get item from item table using item_id
 router.get('/:itemId', auth, async (req, res) => {
   try {
     const itemById = await itemsData.getItemById(req.params.itemId);

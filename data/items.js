@@ -1,5 +1,8 @@
 const models = require('../models/index');
 
+/**
+ * This method is used to show items from item table based on product_id and used condition
+ */
 const getItems = async (productId, used) => {
   if (!productId || !used) {
     throw new Error('Invalid or missing requirements');
@@ -17,6 +20,9 @@ const getItems = async (productId, used) => {
   }
 };
 
+/**
+ * This method is used to find item from item table using item_id
+ */
 const getItemById = async (id) => {
   if (!id) {
     throw new Error('Invalid or missing requirements');
