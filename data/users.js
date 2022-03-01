@@ -53,7 +53,7 @@ const checkUser = async (email, password) => {
     const passwordCompare = await bcrypt.compare(password, user.password);
     if (passwordCompare) {
       if (user.is_activated) {
-        return { authenticated: true, verified: true };
+        return { authenticated: true, verified: true, userId: user.id };
       }
     }
     throw new Error('Invalid or missing requirements');

@@ -1,8 +1,7 @@
 const Sequelize = require('sequelize-cockroachdb');
-
 module.exports = (sequelize) => {
-  const User = sequelize.define(
-    'users',
+  const Product = sequelize.define(
+    'product',
     {
       id: {
         type: Sequelize.UUID,
@@ -10,16 +9,17 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: Sequelize.UUIDV4,
       },
+      barcode: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      barcode_type: {
+        type: Sequelize.TEXT,
+      },
       name: {
         type: Sequelize.TEXT,
       },
-      email: {
-        type: Sequelize.TEXT,
-      },
-      password: {
-        type: Sequelize.TEXT,
-      },
-      is_activated: {
+      category_id: {
         type: Sequelize.BOOLEAN,
       },
     },
@@ -27,15 +27,17 @@ module.exports = (sequelize) => {
     {
       timestamps: false,
       paranoid: false,
+      freezeTableName: true,
     }
   );
 
-  User.associate = (models) => {
-    User.hasMany(models.user_product, { foreignKey: 'id', as: 'user_id' });
+  Product.associate = (models) => {
+    Product.belongsTo(models.Category, { foreignKey: 'category_id' });
+    Product.hasOne(models.user_product, { foreignKey: 'barcode' });
   };
 
-  syncUser(User);
-  return User;
+  syncUser(Product);
+  return Product;
 };
 
 const syncUser = async (model) => {

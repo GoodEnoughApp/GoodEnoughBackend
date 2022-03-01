@@ -90,7 +90,11 @@ router.post('/login', async (req, res) => {
       const d = new Date();
       let twoMonthsFromNow = d.setMonth(d.getMonth() + 2);
       twoMonthsFromNow = new Date(twoMonthsFromNow).toISOString();
-      const authToken = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET);
+      const tokenValue = {
+        userId: users.userId,
+        email: email,
+      };
+      const authToken = jwt.sign(tokenValue, process.env.ACCESS_TOKEN_SECRET);
       res.status(200).json({
         authToken: authToken,
         expiredAt: twoMonthsFromNow,
