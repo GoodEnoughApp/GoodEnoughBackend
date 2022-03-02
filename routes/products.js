@@ -130,38 +130,74 @@ router.put('/custom', auth, async (req, res) => {
 
 // Add an item to a product
 router.post('/:productId', auth, async (req, res) => {
-  const { expirationDate, quantity, cost } = req.body;
-  if (
-    expirationDate === undefined ||
-    quantity === undefined ||
-    cost === undefined
-  ) {
-    res.status(422).json({
-      status: 'error',
-      message: 'Missing required values',
-      code: 'ERROR_MISSING_REQUIRED_VALUES',
-    });
-    return;
-  }
-  const getProductDataById = await productsData.getUserProductById(
-    req.params.productId
-  );
-  if (!getProductDataById.productsFound) {
-    res.status(404).json({
-      status: 'error',
-      message: 'Product not found',
-      code: 'ERROR_NOT_FOUND_PRODUCT',
-    });
-  } else {
-    const decoded = req.user;
-    if (decoded.userId !== getProductDataById.productById.user_id) {
-      res.status(403).json({
+  try {
+    const { expirationDate, quantity, cost } = req.body;
+    if (
+      expirationDate === undefined ||
+      quantity === undefined ||
+      cost === undefined
+    ) {
+      res.status(422).json({
         status: 'error',
-        message: 'Not authorized to perform that action',
-        code: 'ERROR_NOT_ALLOWED',
+        message: 'Missing required values',
+        code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
+      return;
+    }
+    let expDate = new Date(Date.parse(expirationDate));
+    let currentDate = new Date();
+    if (expDate.getTime() < currentDate.getTime()) {
+      res.status(409).json({
+        status: 'error',
+        message: 'Expiration date in the past',
+        code: 'ERROR_PAST_EXPIRATION_DATE',
+      });
+      return;
     } else {
     }
+    const getProductDataById = await productsData.getUserProductById(
+      req.params.productId
+    );
+    if (!getProductDataById.productsFound) {
+      res.status(404).json({
+        status: 'error',
+        message: 'Product not found',
+        code: 'ERROR_NOT_FOUND_PRODUCT',
+      });
+      return;
+    } else {
+      const decoded = req.user;
+      if (decoded.userId !== getProductDataById.productById.user_id) {
+        res.status(403).json({
+          status: 'error',
+          message: 'Not authorized to perform that action',
+          code: 'ERROR_NOT_ALLOWED',
+        });
+        return;
+      } else {
+        const item = await productsData.addToItem(
+          expirationDate,
+          quantity,
+          cost,
+          getProductDataById.productById.id
+        );
+        if (item.itemAdded) {
+          res.status(201).json({ item: item.addedItem, status: 'success' });
+        } else {
+          res.status(500).json({
+            status: 'error',
+            message: 'Server error',
+            code: 'ERROR_SERVER',
+          });
+        }
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
   }
 });
 

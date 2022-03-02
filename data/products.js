@@ -259,10 +259,32 @@ const addCustomProduct = async (
   }
 };
 
+/**
+ * Method to add item in Item table referencing a user product
+ */
+const addToItem = async (expirationDate, quantity, cost, productId) => {
+  let currentDate = new Date().toISOString();
+  const addedItem = await models.Item.create({
+    product_id: productId,
+    expiration_date: expirationDate,
+    created_at: currentDate,
+    quantity: parseInt(quantity),
+    initial_quantity: 0,
+    cost: parseFloat(cost),
+    is_used: true,
+  });
+  if (addedItem === null) {
+    return { itemAdded: false };
+  } else {
+    return { itemAdded: true, addedItem: addedItem.dataValues };
+  }
+};
+
 module.exports = {
   addProduct,
   getUserProducts,
   getUserProductById,
   addCustomProduct,
   findUserProductUsingBarcode,
+  addToItem,
 };
