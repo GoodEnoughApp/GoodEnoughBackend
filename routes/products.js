@@ -1,5 +1,4 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const auth = require('../middlewares/jwtAuth');
 const productsData = require('../data/products');
 const router = express.Router();
@@ -16,7 +15,7 @@ router.put('/', auth, async (req, res) => {
       });
     }
     const decoded = req.user;
-    const addProduct = await productsData.addProduct(barcode, decoded);
+    const addProduct = await productsData.addProduct(barcode, decoded.userId);
     if (addProduct.found) {
       if (addProduct.type === 'USER_PRODUCT') {
         res
@@ -89,17 +88,17 @@ router.put('/custom', auth, async (req, res) => {
       });
     }
     const decoded = req.user;
-    const productExists = await productsData.findUserProductUsingBarcode(
-      barcode
-    );
-    if (productExists.found) {
-      res.status(409).json({
-        status: 'error',
-        message: 'Product exist',
-        code: 'ERROR_BARCODE_UNIQUE',
-      });
-      return;
-    }
+    // const productExists = await productsData.findUserProductUsingBarcode(
+    //   barcode
+    // );
+    // if (productExists.found) {
+    //   res.status(409).json({
+    //     status: 'error',
+    //     message: 'Product exist',
+    //     code: 'ERROR_BARCODE_UNIQUE',
+    //   });
+    //   return;
+    // }
     const addCustomProduct = await productsData.addCustomProduct(
       barcode,
       name,
@@ -108,7 +107,7 @@ router.put('/custom', auth, async (req, res) => {
       brand,
       manufacturer,
       categoryId,
-      decoded
+      decoded.userId
     );
     if (!addCustomProduct.isNew) {
       res

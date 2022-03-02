@@ -57,7 +57,7 @@ const findUpcProductUsingBarcode = async (barcode) => {
  * Found in product table ? return product_id(201) : check in UPC database
  * Found in UPC database ? insert category(if new) and insert result in product and user_product table and return record from user_product(201) : return product_id as null(201)
  */
-const addProduct = async (barcode, decoded) => {
+const addProduct = async (barcode, userId) => {
   const userProduct = await findUserProductUsingBarcode(barcode);
   if (userProduct.found) {
     let tempCategoryId = userProduct.userProduct.category_id;
@@ -67,6 +67,7 @@ const addProduct = async (barcode, decoded) => {
       name: categoryById.categoryById.name,
     };
     delete userProduct.userProduct['category_id'];
+    delete userProduct.userProduct['user_id'];
     return {
       type: 'USER_PRODUCT',
       product: userProduct.userProduct,
@@ -88,7 +89,7 @@ const addProduct = async (barcode, decoded) => {
         );
         const createdProduct = await createProductUsingUPC(
           upcProduct.upcProduct,
-          decoded,
+          userId,
           category[0].dataValues.id
         );
         return {
@@ -106,7 +107,7 @@ const addProduct = async (barcode, decoded) => {
 /**
  * This method is used to insert record form UPC database into the product table
  */
-const createProductUsingUPC = async (upcProduct, decoded, categoryId) => {
+const createProductUsingUPC = async (upcProduct, userId, categoryId) => {
   try {
     const addedProduct = await models.product.findOrCreate({
       where: {
@@ -118,7 +119,7 @@ const createProductUsingUPC = async (upcProduct, decoded, categoryId) => {
     });
     const addedUserProduct = createUserProductUsingUPC(
       upcProduct,
-      decoded,
+      userId,
       categoryId,
       addedProduct[0].dataValues
     );
@@ -133,14 +134,14 @@ const createProductUsingUPC = async (upcProduct, decoded, categoryId) => {
  */
 const createUserProductUsingUPC = async (
   upcProduct,
-  decoded,
+  userId,
   categoryId,
   addedProductData
 ) => {
   try {
     const addedProduct = await models.user_product.findOrCreate({
       where: {
-        user_id: decoded.userId,
+        user_id: userId,
         category_id: categoryId,
         barcode: addedProductData.barcode,
         barcode_type: 'UPC',
@@ -172,6 +173,16 @@ const getUserProducts = async (categoryId) => {
   if (allUserProducts == null) {
     return { productsFound: false };
   } else {
+    for (let index = 0; index < allUserProducts.length; index++) {
+      let tempCategoryId = allUserProducts[index].category_id;
+      let categoryById = await categoryData.getCategoryById(tempCategoryId);
+      allUserProducts[index].dataValues.category = {
+        id: categoryById.categoryById.id,
+        name: categoryById.categoryById.name,
+      };
+      delete allUserProducts[index]['category_id'];
+      delete allUserProducts[index]['user_id'];
+    }
     return { productsFound: true, allUserProducts: allUserProducts };
   }
 };
@@ -195,6 +206,10 @@ const getUserProductById = async (id) => {
   }
 };
 
+/**
+ * This method is used to add a custom product where user provides all the details manually
+ * This method/endpoint will be invoked incase /products: put request gives null result
+ */
 const addCustomProduct = async (
   barcode,
   name,
@@ -203,15 +218,23 @@ const addCustomProduct = async (
   brand,
   manufacturer,
   categoryId,
-  decoded
+  userId
 ) => {
   try {
-    const addedProduct = await models.user_product.findOrCreate({
+    const addedProduct = await models.product.findOrCreate({
       where: {
-        user_id: decoded.userId,
+        barcode: barcode,
+        barcode_type: 'EAN',
+        name: name,
+        category_id: categoryId,
+      },
+    });
+    const addedUserProduct = await models.user_product.findOrCreate({
+      where: {
+        user_id: userId,
         category_id: categoryId,
         barcode: barcode,
-        barcode_type: 'CUSTOM',
+        barcode_type: 'EAN',
         name: name,
         alias: alias,
         description: description,
@@ -219,16 +242,17 @@ const addCustomProduct = async (
         manufacturer: manufacturer,
       },
     });
-    let tempCategoryId = addedProduct[0].dataValues.category_id;
+    let tempCategoryId = addedUserProduct[0].dataValues.category_id;
     let categoryById = await categoryData.getCategoryById(tempCategoryId);
-    addedProduct[0].dataValues.category = {
+    addedUserProduct[0].dataValues.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
-    delete addedProduct[0].dataValues['category_id'];
+    delete addedUserProduct[0].dataValues['category_id'];
+    delete addedUserProduct[0].dataValues['user_id'];
     return {
-      customProduct: addedProduct[0].dataValues,
-      isNew: addedProduct[0]._options.isNewRecord,
+      customProduct: addedUserProduct[0].dataValues,
+      isNew: addedUserProduct[0]._options.isNewRecord,
     };
   } catch (error) {
     throw new Error(error);
