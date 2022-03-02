@@ -1,7 +1,9 @@
 const usersData = require('./users');
-const codesData = require('./verification_codes');
+const productsData = require('./products');
+const codesData = require('./verificationCodes');
 
 module.exports = {
   users: usersData,
-  codes: codesData
+  products: productsData,
+  codes: codesData,
 };

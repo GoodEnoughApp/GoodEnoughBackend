@@ -33,22 +33,21 @@ async function checkEmail(email) {
 
 // return ID from Email
 async function getID(email) {
-  email = email.trim().toLowerCase()
+  email = email.trim().toLowerCase();
   const getUser = await models.users
-  .findOne({
-    where: { email: email },
-  })
+    .findOne({
+      where: { email: email },
+    })
     .catch((err) => {
       throw `error: ${err.message}`;
     });
 
-    return getUser.id
+  return getUser.id;
 }
-
 
 // check password length - Sign up
 function checkPassword(Password) {
-  if (Password.trim().toString().length < 7) {
+  if (Password.toString().length < 8) {
     return true;
   }
   return false;
@@ -65,10 +64,17 @@ const checkUser = async (email, password) => {
   if (user === null) {
     throw new Error('Invalid or missing requirements');
   } else {
-    const passwordCompare = await bcrypt.compare(password, user.password);
+    const passwordCompare = await bcrypt.compare(
+      password,
+      user.dataValues.password
+    );
     if (passwordCompare) {
-      if (user.is_activated) {
-        return { authenticated: true, verified: true };
+      if (user.dataValues.is_activated) {
+        return {
+          authenticated: true,
+          verified: true,
+          userId: user.dataValues.id,
+        };
       }
     }
     throw new Error('Invalid or missing requirements');
@@ -76,12 +82,12 @@ const checkUser = async (email, password) => {
 };
 
 // set temp password - forget password
-async function tempPass (email) {
+async function tempPass(email) {
   if (!email) {
     throw new Error('Invalid or missing requirements');
   }
   const userData = await models.users.findOne({
-    where: { email: email.toLowerCase(),  },
+    where: { email: email.toLowerCase() },
   });
   if (userData === null) {
     throw new Error('Invalid or missing requirements');
@@ -90,49 +96,50 @@ async function tempPass (email) {
     const hashedpassword = await bcrypt.hash(pass, 10);
 
     await models.users.update(
-      { password: hashedpassword},
+      { password: hashedpassword },
       { where: { id: userData.id } }
-    )
-
-    }
-    return pass;
-};
-
+    );
+  }
+  return pass;
+}
 
 function getRandomString(length) {
-  var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var randomChars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var result = '';
-  for ( var i = 0; i < length; i++ ) {
-      result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+  for (var i = 0; i < length; i++) {
+    result += randomChars.charAt(
+      Math.floor(Math.random() * randomChars.length)
+    );
   }
   return result;
 }
 
 // return user from Email
 async function getUser(email) {
-  email = email.trim().toLowerCase()
+  email = email.trim().toLowerCase();
   const getUser = await models.users
-  .findOne({
-    where: { email: email },
-  })
+    .findOne({
+      where: { email: email },
+    })
     .catch((err) => {
       throw `error: ${err.message}`;
     });
 
-    return getUser
+  return getUser;
 }
 
-async function updateUser (userId, name, password) {
+async function updateUser(userId, name, password) {
   if (!userId || !name || !password) {
     throw new Error('Invalid or missing requirements');
   }
   const hashedpassword = await bcrypt.hash(password, 10);
 
-    await models.users.update(
-      { name: name, password:hashedpassword},
-      { where: { id: userId } }
-    )
-};
+  await models.users.update(
+    { name: name, password: hashedpassword },
+    { where: { id: userId } }
+  );
+}
 
 module.exports = {
   insertUser,
@@ -142,5 +149,6 @@ module.exports = {
   getID,
   tempPass,
   getUser,
-  updateUser
+  updateUser,
+  getRandomString
 };
