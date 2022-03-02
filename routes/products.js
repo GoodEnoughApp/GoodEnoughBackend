@@ -78,9 +78,9 @@ router.put('/custom', auth, async (req, res) => {
       brand === undefined ||
       categoryId === undefined ||
       barcode.trim() === '' ||
-      !name.trim() === '' ||
-      !brand.trim() === '' ||
-      !categoryId.trim() === ''
+      name.trim() === '' ||
+      brand.trim() === '' ||
+      categoryId.trim() === ''
     ) {
       res.status(422).json({
         status: 'error',
@@ -134,8 +134,8 @@ router.post('/:productId', auth, async (req, res) => {
   const { expirationDate, quantity, cost } = req.body;
   if (
     expirationDate === undefined ||
-    !quantity === undefined ||
-    !cost === undefined
+    quantity === undefined ||
+    cost === undefined
   ) {
     res.status(422).json({
       status: 'error',
@@ -161,6 +161,7 @@ router.post('/:productId', auth, async (req, res) => {
         message: 'Not authorized to perform that action',
         code: 'ERROR_NOT_ALLOWED',
       });
+    } else {
     }
   }
 });
