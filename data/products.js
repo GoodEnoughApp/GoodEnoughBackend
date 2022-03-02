@@ -280,6 +280,19 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
   }
 };
 
+const deleteProduct = async (productId) => {
+  const deletedProduct = await models.user_product.destroy({
+    where: {
+      id: productId,
+    },
+  });
+  if (deletedProduct === 1) {
+    return { delete: true };
+  } else {
+    return { delete: false };
+  }
+};
+
 module.exports = {
   addProduct,
   getUserProducts,
@@ -287,4 +300,5 @@ module.exports = {
   addCustomProduct,
   findUserProductUsingBarcode,
   addToItem,
+  deleteProduct,
 };
