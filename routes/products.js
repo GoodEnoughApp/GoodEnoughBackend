@@ -8,16 +8,14 @@ const router = express.Router();
 router.put('/', auth, async (req, res) => {
   try {
     const { barcode } = req.body;
-    if (!barcode) {
+    if (barcode === undefined || barcode.trim() === '') {
       res.status(422).json({
         status: 'error',
         message: 'Missing required values',
         code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
     }
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    const decoded = jwt.decode(token);
+    const decoded = req.user;
     const addProduct = await productsData.addProduct(barcode, decoded);
     if (addProduct.found) {
       if (addProduct.type === 'USER_PRODUCT') {
@@ -59,6 +57,111 @@ router.get('/', auth, async (req, res) => {
       message: 'Server error',
       code: 'ERROR_SERVER',
     });
+  }
+});
+
+// Upsert a custom product
+router.put('/custom', auth, async (req, res) => {
+  try {
+    const {
+      barcode,
+      name,
+      alias,
+      description,
+      brand,
+      manufacturer,
+      categoryId,
+    } = req.body;
+    if (
+      barcode === undefined ||
+      name === undefined ||
+      brand === undefined ||
+      categoryId === undefined ||
+      barcode.trim() === '' ||
+      !name.trim() === '' ||
+      !brand.trim() === '' ||
+      !categoryId.trim() === ''
+    ) {
+      res.status(422).json({
+        status: 'error',
+        message: 'Missing required values',
+        code: 'ERROR_MISSING_REQUIRED_VALUES',
+      });
+    }
+    const decoded = req.user;
+    const productExists = await productsData.findUserProductUsingBarcode(
+      barcode
+    );
+    if (productExists.found) {
+      res.status(409).json({
+        status: 'error',
+        message: 'Product exist',
+        code: 'ERROR_BARCODE_UNIQUE',
+      });
+      return;
+    }
+    const addCustomProduct = await productsData.addCustomProduct(
+      barcode,
+      name,
+      alias,
+      description,
+      brand,
+      manufacturer,
+      categoryId,
+      decoded
+    );
+    if (!addCustomProduct.isNew) {
+      res
+        .status(200)
+        .json({ product: addCustomProduct.customProduct, status: 'success' });
+    } else {
+      res.status(201).json({
+        productId: addCustomProduct.customProduct.id,
+        status: 'success',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
+  }
+});
+
+// Add an item to a product
+router.post('/:productId', auth, async (req, res) => {
+  const { expirationDate, quantity, cost } = req.body;
+  if (
+    expirationDate === undefined ||
+    !quantity === undefined ||
+    !cost === undefined
+  ) {
+    res.status(422).json({
+      status: 'error',
+      message: 'Missing required values',
+      code: 'ERROR_MISSING_REQUIRED_VALUES',
+    });
+    return;
+  }
+  const getProductDataById = await productsData.getUserProductById(
+    req.params.productId
+  );
+  if (!getProductDataById.productsFound) {
+    res.status(404).json({
+      status: 'error',
+      message: 'Product not found',
+      code: 'ERROR_NOT_FOUND_PRODUCT',
+    });
+  } else {
+    const decoded = req.user;
+    if (decoded.userId !== getProductDataById.productById.user_id) {
+      res.status(403).json({
+        status: 'error',
+        message: 'Not authorized to perform that action',
+        code: 'ERROR_NOT_ALLOWED',
+      });
+    }
   }
 });
 

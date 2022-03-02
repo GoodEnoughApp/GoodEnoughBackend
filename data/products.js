@@ -61,7 +61,7 @@ const addProduct = async (barcode, decoded) => {
   const userProduct = await findUserProductUsingBarcode(barcode);
   if (userProduct.found) {
     let tempCategoryId = userProduct.userProduct.category_id;
-    categoryById = await categoryData.getCategoryById(tempCategoryId);
+    let categoryById = await categoryData.getCategoryById(tempCategoryId);
     userProduct.userProduct.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
@@ -153,7 +153,7 @@ const createUserProductUsingUPC = async (
     });
     return addedProduct[0].dataValues;
   } catch (error) {
-    console.log(error);
+    throw new Error(error);
   }
 };
 
@@ -191,7 +191,47 @@ const getUserProductById = async (id) => {
   if (productById == null) {
     return { productsFound: false };
   } else {
-    return { productsFound: true, productById: productById };
+    return { productsFound: true, productById: productById.dataValues };
+  }
+};
+
+const addCustomProduct = async (
+  barcode,
+  name,
+  alias,
+  description,
+  brand,
+  manufacturer,
+  categoryId,
+  decoded
+) => {
+  try {
+    const addedProduct = await models.user_product.findOrCreate({
+      where: {
+        user_id: decoded.userId,
+        category_id: categoryId,
+        barcode: barcode,
+        barcode_type: 'CUSTOM',
+        name: name,
+        alias: alias,
+        description: description,
+        brand: brand,
+        manufacturer: manufacturer,
+      },
+    });
+    let tempCategoryId = addedProduct[0].dataValues.category_id;
+    let categoryById = await categoryData.getCategoryById(tempCategoryId);
+    addedProduct[0].dataValues.category = {
+      id: categoryById.categoryById.id,
+      name: categoryById.categoryById.name,
+    };
+    delete addedProduct[0].dataValues['category_id'];
+    return {
+      customProduct: addedProduct[0].dataValues,
+      isNew: addedProduct[0]._options.isNewRecord,
+    };
+  } catch (error) {
+    throw new Error(error);
   }
 };
 
@@ -199,4 +239,6 @@ module.exports = {
   addProduct,
   getUserProducts,
   getUserProductById,
+  addCustomProduct,
+  findUserProductUsingBarcode,
 };
