@@ -31,9 +31,24 @@ async function checkEmail(email) {
   return false;
 }
 
+// return ID from Email
+async function getID(email) {
+  email = email.trim().toLowerCase()
+  const getUser = await models.users
+  .findOne({
+    where: { email: email },
+  })
+    .catch((err) => {
+      throw `error: ${err.message}`;
+    });
+
+    return getUser.id
+}
+
+
 // check password length - Sign up
 function checkPassword(Password) {
-  if (Password.toString().length < 8) {
+  if (Password.trim().toString().length < 7) {
     return true;
   }
   return false;
@@ -60,9 +75,72 @@ const checkUser = async (email, password) => {
   }
 };
 
+// set temp password - forget password
+async function tempPass (email) {
+  if (!email) {
+    throw new Error('Invalid or missing requirements');
+  }
+  const userData = await models.users.findOne({
+    where: { email: email.toLowerCase(),  },
+  });
+  if (userData === null) {
+    throw new Error('Invalid or missing requirements');
+  } else {
+    var pass = getRandomString(8);
+    const hashedpassword = await bcrypt.hash(pass, 10);
+
+    await models.users.update(
+      { password: hashedpassword},
+      { where: { id: userData.id } }
+    )
+
+    }
+    return pass;
+};
+
+
+function getRandomString(length) {
+  var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var result = '';
+  for ( var i = 0; i < length; i++ ) {
+      result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+  }
+  return result;
+}
+
+// return user from Email
+async function getUser(email) {
+  email = email.trim().toLowerCase()
+  const getUser = await models.users
+  .findOne({
+    where: { email: email },
+  })
+    .catch((err) => {
+      throw `error: ${err.message}`;
+    });
+
+    return getUser
+}
+
+async function updateUser (userId, name, password) {
+  if (!userId || !name || !password) {
+    throw new Error('Invalid or missing requirements');
+  }
+  const hashedpassword = await bcrypt.hash(password, 10);
+
+    await models.users.update(
+      { name: name, password:hashedpassword},
+      { where: { id: userId } }
+    )
+};
+
 module.exports = {
   insertUser,
   checkEmail,
   checkPassword,
   checkUser,
+  getID,
+  tempPass,
+  getUser,
+  updateUser
 };
