@@ -153,7 +153,6 @@ router.post('/:productId', auth, async (req, res) => {
         code: 'ERROR_PAST_EXPIRATION_DATE',
       });
       return;
-    } else {
     }
     const getProductDataById = await productsData.getUserProductById(
       req.params.productId
@@ -165,31 +164,30 @@ router.post('/:productId', auth, async (req, res) => {
         code: 'ERROR_NOT_FOUND_PRODUCT',
       });
       return;
+    }
+    const decoded = req.user;
+    if (decoded.userId !== getProductDataById.productById.user_id) {
+      res.status(403).json({
+        status: 'error',
+        message: 'Not authorized to perform that action',
+        code: 'ERROR_NOT_ALLOWED',
+      });
+      return;
     } else {
-      const decoded = req.user;
-      if (decoded.userId !== getProductDataById.productById.user_id) {
-        res.status(403).json({
-          status: 'error',
-          message: 'Not authorized to perform that action',
-          code: 'ERROR_NOT_ALLOWED',
-        });
-        return;
+      const item = await productsData.addToItem(
+        expirationDate,
+        quantity,
+        cost,
+        getProductDataById.productById.id
+      );
+      if (item.itemAdded) {
+        res.status(201).json({ item: item.addedItem, status: 'success' });
       } else {
-        const item = await productsData.addToItem(
-          expirationDate,
-          quantity,
-          cost,
-          getProductDataById.productById.id
-        );
-        if (item.itemAdded) {
-          res.status(201).json({ item: item.addedItem, status: 'success' });
-        } else {
-          res.status(500).json({
-            status: 'error',
-            message: 'Server error',
-            code: 'ERROR_SERVER',
-          });
-        }
+        res.status(500).json({
+          status: 'error',
+          message: 'Server error',
+          code: 'ERROR_SERVER',
+        });
       }
     }
   } catch (error) {
@@ -201,6 +199,59 @@ router.post('/:productId', auth, async (req, res) => {
   }
 });
 
+// router.put('/:productId', auth, async (req, res) => {
+//   try {
+//     const {
+//       barcode,
+//       name,
+//       alias,
+//       description,
+//       brand,
+//       manufacturer,
+//       categoryId,
+//     } = req.body;
+//     if (
+//       barcode === undefined ||
+//       name === undefined ||
+//       alias === undefined ||
+//       description === undefined ||
+//       brand === undefined ||
+//       manufacturer === undefined ||
+//       categoryId === undefined ||
+//       barcode.trim() === '' ||
+//       name.trim() === '' ||
+//       alias.trim() === '' ||
+//       description.trim() === '' ||
+//       brand.trim() === '' ||
+//       manufacturer.trim() === '' ||
+//       categoryId.trim() === ''
+//     ) {
+//       res.status(422).json({
+//         status: 'error',
+//         message: 'Missing required values',
+//         code: 'ERROR_MISSING_REQUIRED_VALUES',
+//       });
+//     }
+//     const getProductDataById = await productsData.getUserProductById(
+//       req.params.productId
+//     );
+//     if (!getProductDataById.productsFound) {
+//       res.status(404).json({
+//         status: 'error',
+//         message: 'Product not found',
+//         code: 'ERROR_NOT_FOUND_PRODUCT',
+//       });
+//       return;
+//     }
+//   } catch (error) {
+//     res.status(500).json({
+//       status: 'error',
+//       message: 'Server error',
+//       code: 'ERROR_SERVER',
+//     });
+//   }
+// });
+
 // Get a particular product using product_id from user_product table
 router.get('/:productId', auth, async (req, res) => {
   try {
@@ -210,6 +261,44 @@ router.get('/:productId', auth, async (req, res) => {
     if (productById.productsFound) {
       res.status(200).json({
         product: productById.productById,
+        status: 'success',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
+  }
+});
+
+// Delete from user product using product id
+router.delete('/:productId', auth, async (req, res) => {
+  try {
+    const getProductDataById = await productsData.getUserProductById(
+      req.params.productId
+    );
+    if (!getProductDataById.productsFound) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Product not found',
+        code: 'ERROR_NOT_FOUND_PRODUCT',
+      });
+    }
+    const decoded = req.user;
+    if (decoded.userId !== getProductDataById.productById.user_id) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Not authorized to perform that action',
+        code: 'ERROR_NOT_ALLOWED',
+      });
+    }
+    const deletedProduct = await productsData.deleteProduct(
+      req.params.productId
+    );
+    if (deletedProduct.delete) {
+      return res.status(200).json({
         status: 'success',
       });
     }
