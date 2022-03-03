@@ -9,7 +9,7 @@
     "lint:check": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
+    "start": "node app.js",
     "dev": "nodemon -r dotenv/config app.js"
   },
   "author": "",
