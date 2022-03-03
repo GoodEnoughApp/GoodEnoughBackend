@@ -16,7 +16,7 @@ module.exports = (sequelize) => {
         type: Sequelize.DATE,
       },
       created_at: {
-        type: Sequelize.TIME,
+        type: Sequelize.DATE,
       },
       quantity: {
         type: Sequelize.INTEGER,

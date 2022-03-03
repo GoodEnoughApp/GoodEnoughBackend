@@ -105,7 +105,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     try {
-      if (!req.body || req.body.email === '' || req.body.password === '') {
+      if (!req.body || req.body.email.trim() === '' || req.body.password.trim() === '') {
         throw new Error('Missing required values');
       }
       // userData.checkPassword(req.body.password);

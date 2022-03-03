@@ -64,10 +64,7 @@ const checkUser = async (email, password) => {
   if (user === null) {
     throw new Error('Invalid or missing requirements');
   } else {
-    const passwordCompare = await bcrypt.compare(
-      password,
-      user.dataValues.password
-    );
+    const passwordCompare = await bcrypt.compare(password, user.dataValues.password);
     if (passwordCompare) {
       if (user.dataValues.is_activated) {
         return {
@@ -95,22 +92,16 @@ async function tempPass(email) {
     var pass = getRandomString(8);
     const hashedpassword = await bcrypt.hash(pass, 10);
 
-    await models.users.update(
-      { password: hashedpassword },
-      { where: { id: userData.id } }
-    );
+    await models.users.update({ password: hashedpassword }, { where: { id: userData.id } });
   }
   return pass;
 }
 
 function getRandomString(length) {
-  var randomChars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var result = '';
   for (var i = 0; i < length; i++) {
-    result += randomChars.charAt(
-      Math.floor(Math.random() * randomChars.length)
-    );
+    result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
   }
   return result;
 }
@@ -135,10 +126,7 @@ async function updateUser(userId, name, password) {
   }
   const hashedpassword = await bcrypt.hash(password, 10);
 
-  await models.users.update(
-    { name: name, password: hashedpassword },
-    { where: { id: userId } }
-  );
+  await models.users.update({ name: name, password: hashedpassword }, { where: { id: userId } });
 }
 
 module.exports = {

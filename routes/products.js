@@ -18,13 +18,9 @@ router.put('/', auth, async (req, res) => {
     const addProduct = await productsData.addProduct(barcode, decoded.userId);
     if (addProduct.found) {
       if (addProduct.type === 'USER_PRODUCT') {
-        res
-          .status(200)
-          .json({ product: addProduct.product, status: 'success' });
+        res.status(200).json({ product: addProduct.product, status: 'success' });
       } else {
-        res
-          .status(201)
-          .json({ productId: addProduct.product.id, status: 'success' });
+        res.status(201).json({ productId: addProduct.product.id, status: 'success' });
       }
     } else {
       res.status(201).json({ productId: null, status: 'success' });
@@ -41,9 +37,7 @@ router.put('/', auth, async (req, res) => {
 // Get products based on category from user_product table
 router.get('/', auth, async (req, res) => {
   try {
-    const allUserProducts = await productsData.getUserProducts(
-      req.query.categoryId
-    );
+    const allUserProducts = await productsData.getUserProducts(req.query.categoryId);
     if (allUserProducts.productsFound) {
       res.status(200).json({
         products: allUserProducts.allUserProducts,
@@ -62,15 +56,7 @@ router.get('/', auth, async (req, res) => {
 // Upsert a custom product
 router.put('/custom', auth, async (req, res) => {
   try {
-    const {
-      barcode,
-      name,
-      alias,
-      description,
-      brand,
-      manufacturer,
-      categoryId,
-    } = req.body;
+    const { barcode, name, alias, description, brand, manufacturer, categoryId } = req.body;
     if (
       barcode === undefined ||
       name === undefined ||
@@ -110,9 +96,7 @@ router.put('/custom', auth, async (req, res) => {
       decoded.userId
     );
     if (!addCustomProduct.isNew) {
-      res
-        .status(200)
-        .json({ product: addCustomProduct.customProduct, status: 'success' });
+      res.status(200).json({ product: addCustomProduct.customProduct, status: 'success' });
     } else {
       res.status(201).json({
         productId: addCustomProduct.customProduct.id,
@@ -132,11 +116,7 @@ router.put('/custom', auth, async (req, res) => {
 router.post('/:productId', auth, async (req, res) => {
   try {
     const { expirationDate, quantity, cost } = req.body;
-    if (
-      expirationDate === undefined ||
-      quantity === undefined ||
-      cost === undefined
-    ) {
+    if (expirationDate === undefined || quantity === undefined || cost === undefined) {
       res.status(422).json({
         status: 'error',
         message: 'Missing required values',
@@ -154,9 +134,7 @@ router.post('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const getProductDataById = await productsData.getUserProductById(
-      req.params.productId
-    );
+    const getProductDataById = await productsData.getUserProductById(req.params.productId);
     if (!getProductDataById.productsFound) {
       res.status(404).json({
         status: 'error',
@@ -255,9 +233,7 @@ router.post('/:productId', auth, async (req, res) => {
 // Get a particular product using product_id from user_product table
 router.get('/:productId', auth, async (req, res) => {
   try {
-    const productById = await productsData.getUserProductById(
-      req.params.productId
-    );
+    const productById = await productsData.getUserProductById(req.params.productId);
     if (productById.productsFound) {
       res.status(200).json({
         product: productById.productById,
@@ -276,9 +252,7 @@ router.get('/:productId', auth, async (req, res) => {
 // Delete from user product using product id
 router.delete('/:productId', auth, async (req, res) => {
   try {
-    const getProductDataById = await productsData.getUserProductById(
-      req.params.productId
-    );
+    const getProductDataById = await productsData.getUserProductById(req.params.productId);
     if (!getProductDataById.productsFound) {
       return res.status(404).json({
         status: 'error',
@@ -294,9 +268,7 @@ router.delete('/:productId', auth, async (req, res) => {
         code: 'ERROR_NOT_ALLOWED',
       });
     }
-    const deletedProduct = await productsData.deleteProduct(
-      req.params.productId
-    );
+    const deletedProduct = await productsData.deleteProduct(req.params.productId);
     if (deletedProduct.delete) {
       return res.status(200).json({
         status: 'success',
