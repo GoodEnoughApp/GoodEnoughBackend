@@ -132,12 +132,7 @@ const createProductUsingUPC = async (upcProduct, userId, categoryId) => {
 /**
  * This method is used to insert record from UPC databse to user_product table
  */
-const createUserProductUsingUPC = async (
-  upcProduct,
-  userId,
-  categoryId,
-  addedProductData
-) => {
+const createUserProductUsingUPC = async (upcProduct, userId, categoryId, addedProductData) => {
   try {
     const addedProduct = await models.user_product.findOrCreate({
       where: {

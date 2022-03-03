@@ -22,10 +22,7 @@ async function checkCode(userId, code) {
   if (userCode === null) {
     throw new Error('Invalid or missing requirements');
   } else {
-    await models.users.update(
-      { is_activated: true },
-      { where: { id: userId } }
-    );
+    await models.users.update({ is_activated: true }, { where: { id: userId } });
   }
 }
 
