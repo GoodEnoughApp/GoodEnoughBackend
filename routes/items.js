@@ -28,6 +28,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// To update an item in Item table
 router.put('/:itemId', auth, async (req, res) => {
   try {
     const { expirationDate, initialQuantity, quantity, cost, isUsed } = req.body;
@@ -131,4 +132,40 @@ router.get('/:itemId', auth, async (req, res) => {
   }
 });
 
+// To delete an item inside item table
+router.delete('/:itemId', auth, async (req, res) => {
+  try {
+    const itemById = await itemsData.getItemById(req.params.itemId);
+    if (!itemById.itemsFound) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Item not found',
+        code: 'ERROR_NOT_FOUND_ITEM',
+      });
+    }
+    const userId = req.user.userId;
+    const productById = await productsData.getUserProductById(itemById.itemById.product_id);
+    if (productById.productsFound) {
+      if (userId !== productById.productById.user_id) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Not authorized to perform that action',
+          code: 'ERROR_NOT_ALLOWED',
+        });
+      }
+    }
+    const deletedItem = await itemsData.deleteItem(req.params.itemId);
+    if (deletedItem.delete) {
+      return res.status(200).json({
+        status: 'success',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
+  }
+});
 module.exports = router;

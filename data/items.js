@@ -39,6 +39,9 @@ const getItemById = async (id) => {
   }
 };
 
+/**
+ * This method is used to update an item in Item table
+ */
 const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cost, isUsed) => {
   const updatedItem = await models.Item.update(
     {
@@ -60,8 +63,25 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
   }
 };
 
+/**
+ * This method is used to delete an item in Item table
+ */
+const deleteItem = async (itemId) => {
+  const deletedItem = await models.Item.destroy({
+    where: {
+      id: itemId,
+    },
+  });
+  if (deletedItem === 1) {
+    return { delete: true };
+  } else {
+    return { delete: false };
+  }
+};
+
 module.exports = {
   getItems,
   getItemById,
   updateItem,
+  deleteItem,
 };
