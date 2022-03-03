@@ -58,7 +58,6 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
     const newUpdatedItem = await getItemById(itemId);
     return { itemUpdated: true, item: newUpdatedItem.itemById };
   }
-  console.log(updatedItem);
 };
 
 module.exports = {
