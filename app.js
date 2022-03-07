@@ -13,7 +13,7 @@ app.use(
   })
 );
 
-// model.Item.findAll().then((data) => console.log(data));
+// model.shopping_list_item.findAll().then((data) => console.log(data));
 configRoutes(app);
 app.use(express.urlencoded({ extended: true }));
 app.listen(process.env.PORT || 3000, () => {
