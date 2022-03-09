@@ -239,6 +239,12 @@ router.get('/:productId', auth, async (req, res) => {
         product: productById.productById,
         status: 'success',
       });
+    } else {
+      res.status(404).json({
+        status: 'error',
+        message: 'Product not found',
+        code: 'ERROR_NOT_FOUND_PRODUCT',
+      });
     }
   } catch (error) {
     res.status(500).json({
