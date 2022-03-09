@@ -106,6 +106,21 @@ function getRandomString(length) {
   return result;
 }
 
+function getActivationCode() {
+  return padLeadingZeros(randomNumber(0, 999999), 6);
+}
+
+function randomNumber(min, max) {
+   min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function padLeadingZeros(num, size) {
+  let s = num + '';
+  while (s.length < size) s = '0' + s;
+  return s;
+}
+
 // return user from Email
 async function getUser(email) {
   email = email.trim().toLowerCase();
@@ -139,4 +154,5 @@ module.exports = {
   getUser,
   updateUser,
   getRandomString,
+  getActivationCode
 };

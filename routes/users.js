@@ -37,7 +37,7 @@ router.post('/register', async (req, res) => {
       await userData.insertUser(user.name, user.email, hashedpassword, false);
 
       var userId = await userData.getID(user.email);
-      var code = userData.getRandomString(6);
+      var code = userData.getActivationCode();
 
       await codeData.insertCode(code, userId);
       let transporter = nodemailer.createTransport({
