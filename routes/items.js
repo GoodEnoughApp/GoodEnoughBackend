@@ -7,12 +7,15 @@ const router = express.Router();
 // To get item from item table based on product_id and used condition
 router.get('/', auth, async (req, res) => {
   try {
-    if (req.query && req.query.used === 'true') {
-      req.query.used = true;
-    } else {
-      req.query.used = false;
+    let productId = '';
+    let used = false;
+    if (req.query && req.query.used && req.query.used.trim() === 'true') {
+      used = true;
     }
-    const allItems = await itemsData.getItems(req.query.productId, req.query.used);
+    if (req.query && req.query.productId && req.query.productId.trim() != '') {
+      productId = req.query.productId;
+    }
+    const allItems = await itemsData.getItems(productId, used);
     if (allItems.itemsFound) {
       res.status(200).json({
         items: allItems.allItems,
