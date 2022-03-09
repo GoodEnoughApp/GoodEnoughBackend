@@ -37,7 +37,11 @@ router.put('/', auth, async (req, res) => {
 // Get products based on category from user_product table
 router.get('/', auth, async (req, res) => {
   try {
-    const allUserProducts = await productsData.getUserProducts(req.query.categoryId);
+    let categoryId = '';
+    if (req.query && req.query.categoryId !== undefined) {
+      categoryId = req.query.categoryId;
+    }
+    const allUserProducts = await productsData.getUserProducts(categoryId);
     if (allUserProducts.productsFound) {
       res.status(200).json({
         products: allUserProducts.allUserProducts,

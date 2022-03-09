@@ -157,13 +157,13 @@ const createUserProductUsingUPC = async (upcProduct, userId, categoryId, addedPr
  * This method is used to find product(s) in user_product table using categoryId as a param
  */
 const getUserProducts = async (categoryId) => {
-  if (!categoryId) {
-    throw new Error('Invalid or missing requirements');
+  let allUserProducts;
+  let where = {};
+  if (categoryId.trim() != '') {
+    where.category_id = categoryId;
   }
-  const allUserProducts = await models.user_product.findAll({
-    where: {
-      category_id: categoryId,
-    },
+  allUserProducts = await models.user_product.findAll({
+    where: where,
   });
   if (allUserProducts == null) {
     return { productsFound: false };
