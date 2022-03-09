@@ -99,23 +99,24 @@ router.put('/:itemId', auth, async (req, res) => {
 // To get item from item table using item_id
 router.get('/:itemId', auth, async (req, res) => {
   try {
-    const userId = req.user.userId;
-    const productById = await productsData.getUserProductById(itemById.itemById.product_id);
-    if (productById.productsFound) {
-      if (userId !== productById.productById.user_id) {
-        return res.status(403).json({
-          status: 'error',
-          message: 'Not authorized to perform that action',
-          code: 'ERROR_NOT_ALLOWED',
-        });
-      }
-    }
     const itemById = await itemsData.getItemById(req.params.itemId);
     if (itemById.itemsFound) {
-      return res.status(200).json({
-        item: itemById.itemById,
-        status: 'success',
-      });
+      const userId = req.user.userId;
+      const productById = await productsData.getUserProductById(itemById.itemById.product_id);
+      if (productById.productsFound) {
+        if (userId !== productById.productById.user_id) {
+          return res.status(403).json({
+            status: 'error',
+            message: 'Not authorized to perform that action',
+            code: 'ERROR_NOT_ALLOWED',
+          });
+        } else {
+          return res.status(200).json({
+            item: itemById.itemById,
+            status: 'success',
+          });
+        }
+      }
     } else {
       return res.status(404).json({
         status: 'error',
