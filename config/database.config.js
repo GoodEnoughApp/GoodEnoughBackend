@@ -1,5 +1,4 @@
 require('dotenv').config();
-const { database } = require('../config/database.config.js');
 
 module.exports = {
   local: {
