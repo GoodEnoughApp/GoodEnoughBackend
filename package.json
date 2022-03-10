@@ -8,7 +8,7 @@
     "format:write": "prettier --write .",
     "lint:check": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "jest",
+    "test": "jest --config ./jest.config.js --forceExit --coverage",
     "start": "node app.js",
     "dev": "nodemon -r dotenv/config app.js"
   },
@@ -31,11 +31,15 @@
     "sequelize-cockroachdb": "^6.0.5"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.5",
+    "@babel/preset-env": "^7.16.11",
+    "babel-jest": "^27.5.1",
     "eslint": "^8.9.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.4",
+    "jest": "^27.1.1",
     "prettier": "2.5.1",
     "sequelize-cli": "^6.4.1",
-    "jest": "^27.1.1"
+    "supertest": "^6.2.2"
   }
 }
