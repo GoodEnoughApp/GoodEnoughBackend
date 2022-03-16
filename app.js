@@ -19,3 +19,5 @@ app.use(express.urlencoded({ extended: true }));
 app.listen(process.env.PORT || 3000, () => {
   console.log("We've now got a server!");
 });
+
+module.exports = app;

@@ -46,4 +46,19 @@ module.exports = {
       },
     },
   },
+  test: {
+    dialect: 'postgres',
+    database: process.env.TEST_DB_NAME,
+    host: process.env.TEST_DB_HOST,
+    username: process.env.TEST_DB_USERNAME,
+    password: process.env.TEST_DB_PASS,
+    port: process.env.TEST_DB_PORT,
+    logging: process.env.DB_LOGGING === 1 ? console.log : null,
+    dialectOptions: {
+      ssl: {
+        // For secure connection:
+        ca: process.env.TEST_DB_CRT,
+      },
+    },
+  },
 };
