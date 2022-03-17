@@ -61,7 +61,8 @@ router.get('/', auth, async (req, res) => {
       return;
     }
     try {
-      const allUserProducts = await productsData.getUserProducts(req.query.categoryId);
+      const userId = req.user.userId;
+      const allUserProducts = await productsData.getUserProducts(req.query.categoryId, userId);
       if (allUserProducts.productsFound) {
         res.status(200).json({
           products: allUserProducts.allUserProducts,
@@ -318,8 +319,17 @@ router.get('/:productId', auth, async (req, res) => {
       });
       return;
     }
+    const userId = req.user.userId;
     const productById = await productsData.getUserProductById(req.params.productId);
     if (productById.productsFound) {
+      if (productById.productById.user_id !== userId) {
+        res.status(403).json({
+          status: 'error',
+          message: 'Not authorized to perform that action',
+          code: 'ERROR_NOT_ALLOWED',
+        });
+        return;
+      }
       res.status(200).json({
         product: productById.productById,
         status: 'success',
