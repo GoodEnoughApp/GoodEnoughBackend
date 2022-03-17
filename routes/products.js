@@ -385,6 +385,7 @@ router.delete('/:productId', auth, async (req, res) => {
         message: error.message,
         code: 'ERROR',
       });
+      return;
     }
   } catch (error) {
     res.status(500).json({
