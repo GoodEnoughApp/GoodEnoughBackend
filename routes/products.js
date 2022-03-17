@@ -13,6 +13,7 @@ router.put('/', auth, async (req, res) => {
         message: 'Missing required values',
         code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
+      return;
     }
     const decoded = req.user;
     const addProduct = await productsData.addProduct(barcode, decoded.userId);
@@ -76,6 +77,7 @@ router.put('/custom', auth, async (req, res) => {
         message: 'Missing required values',
         code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
+      return;
     }
     const decoded = req.user;
     // const productExists = await productsData.findUserProductUsingBarcode(
@@ -235,6 +237,7 @@ router.post('/:productId', auth, async (req, res) => {
 // });
 
 // Get a particular product using product_id from user_product table
+
 router.get('/:productId', auth, async (req, res) => {
   try {
     const productById = await productsData.getUserProductById(req.params.productId);
@@ -243,12 +246,14 @@ router.get('/:productId', auth, async (req, res) => {
         product: productById.productById,
         status: 'success',
       });
+      return;
     } else {
       res.status(404).json({
         status: 'error',
         message: 'Product not found',
         code: 'ERROR_NOT_FOUND_PRODUCT',
       });
+      return;
     }
   } catch (error) {
     res.status(500).json({
@@ -264,25 +269,28 @@ router.delete('/:productId', auth, async (req, res) => {
   try {
     const getProductDataById = await productsData.getUserProductById(req.params.productId);
     if (!getProductDataById.productsFound) {
-      return res.status(404).json({
+      res.status(404).json({
         status: 'error',
         message: 'Product not found',
         code: 'ERROR_NOT_FOUND_PRODUCT',
       });
+      return;
     }
     const decoded = req.user;
     if (decoded.userId !== getProductDataById.productById.user_id) {
-      return res.status(403).json({
+      res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
         code: 'ERROR_NOT_ALLOWED',
       });
+      return;
     }
     const deletedProduct = await productsData.deleteProduct(req.params.productId);
     if (deletedProduct.delete) {
-      return res.status(200).json({
+      res.status(200).json({
         status: 'success',
       });
+      return;
     }
   } catch (error) {
     res.status(500).json({
