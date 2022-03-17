@@ -5,7 +5,7 @@ const models = require('../models/index');
  */
 const getCategory = async () => {
   const allCategory = await models.Category.findAll();
-  if (allCategory == null) {
+  if (allCategory == null || allCategory.length === 0) {
     return { categoryFound: false };
   } else {
     return { categoryFound: true, allCategory: allCategory };

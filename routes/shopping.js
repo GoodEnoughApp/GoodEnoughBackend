@@ -43,6 +43,7 @@ router.post('/', auth, async (req, res) => {
           message: 'Server error',
           code: 'ERROR_SERVER',
         });
+        return;
       }
     }
   } catch (error) {
@@ -63,6 +64,7 @@ router.get('/', auth, async (req, res) => {
         items: allItems.allItems,
         status: 'success',
       });
+      return;
     }
   } catch (error) {
     res.status(500).json({
@@ -78,11 +80,12 @@ router.put('/:itemId', auth, async (req, res) => {
   try {
     const { quantity, cost } = req.body;
     if (quantity === undefined || cost === undefined) {
-      return res.status(422).json({
+      res.status(422).json({
         status: 'error',
         message: 'Missing required values',
         code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
+      return;
     }
     const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
     if (!itemById.itemsFound) {
@@ -91,21 +94,23 @@ router.put('/:itemId', auth, async (req, res) => {
         message: 'Item not found',
         code: 'ERROR_NOT_FOUND_ITEM',
       });
+      return;
     }
     const userId = req.user.userId;
     const productById = await productsData.getUserProductById(itemById.itemById.product_id);
     if (productById.productsFound) {
       if (userId !== productById.productById.user_id) {
-        return res.status(403).json({
+        res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',
           code: 'ERROR_NOT_ALLOWED',
         });
+        return;
       }
     }
     const updatedItem = await shoppingData.updateShoppingItem(req.params.itemId, quantity, cost);
     if (updatedItem.itemUpdated) {
-      return res.status(200).json({ item: updatedItem.item, status: 'success' });
+      res.status(200).json({ item: updatedItem.item, status: 'success' });
     } else {
       throw new Error();
     }
@@ -127,24 +132,27 @@ router.get('/:itemId', auth, async (req, res) => {
       const productById = await productsData.getUserProductById(itemById.itemById.product_id);
       if (productById.productsFound) {
         if (userId !== productById.productById.user_id) {
-          return res.status(403).json({
+          res.status(403).json({
             status: 'error',
             message: 'Not authorized to perform that action',
             code: 'ERROR_NOT_ALLOWED',
           });
+          return;
         } else {
-          return res.status(200).json({
+          res.status(200).json({
             item: itemById.itemById,
             status: 'success',
           });
+          return;
         }
       }
     } else {
-      return res.status(404).json({
+      res.status(404).json({
         status: 'error',
         message: 'Item not found',
         code: 'ERROR_NOT_FOUND_ITEM',
       });
+      return;
     }
   } catch (error) {
     res.status(500).json({
@@ -160,28 +168,31 @@ router.delete('/:itemId', auth, async (req, res) => {
   try {
     const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
     if (!itemById.itemsFound) {
-      return res.status(404).json({
+      res.status(404).json({
         status: 'error',
         message: 'Item not found',
         code: 'ERROR_NOT_FOUND_ITEM',
       });
+      return;
     }
     const userId = req.user.userId;
     const productById = await productsData.getUserProductById(itemById.itemById.product_id);
     if (productById.productsFound) {
       if (userId !== productById.productById.user_id) {
-        return res.status(403).json({
+        res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',
           code: 'ERROR_NOT_ALLOWED',
         });
+        return;
       }
     }
     const deletedItem = await shoppingData.deleteShoppingItem(req.params.itemId);
     if (deletedItem.delete) {
-      return res.status(200).json({
+      res.status(200).json({
         status: 'success',
       });
+      return;
     }
   } catch (error) {
     res.status(500).json({
