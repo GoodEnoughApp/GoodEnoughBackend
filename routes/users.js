@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const userData = require('../data/users');
 const codeData = require('../data/verificationCodes');
 const auth = require('../middlewares/jwtAuth');
+const verify = require('../middlewares/validation');
 
 // user sign up
 router.post('/register', async (req, res) => {
@@ -66,14 +67,17 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     try {
-      if (!req.body || req.body.email.trim() === '' || req.body.password.trim() === '') {
+      if (
+        !req.body ||
+        !verify.validEmail(req.body.email) ||
+        !verify.validString(req.body.password)
+      ) {
         throw new Error('Missing required values');
       }
-      // userData.checkPassword(req.body.password);
     } catch (error) {
       res.status(422).json({
         status: 'error',
-        message: error,
+        message: error.message,
         code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
       return;
