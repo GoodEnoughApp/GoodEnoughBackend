@@ -139,13 +139,15 @@ router.post('/login', async (req, res) => {
     }
     if (users.authenticated === true) {
       const d = new Date();
-      let twoMonthsFromNow = d.setMonth(d.getMonth() + 2);
+      let twoMonthsFromNow = d.setDate(d.getDate() + 60);
       twoMonthsFromNow = new Date(twoMonthsFromNow).toISOString();
       const tokenValue = {
         userId: users.userId,
         email: email,
       };
-      const authToken = jwt.sign(tokenValue, process.env.ACCESS_TOKEN_SECRET);
+      const authToken = jwt.sign(tokenValue, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '60d',
+      });
       res.status(200).json({
         authToken: authToken,
         expiredAt: twoMonthsFromNow,

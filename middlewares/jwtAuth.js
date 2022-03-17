@@ -14,11 +14,12 @@ const verifyToken = (req, res, next) => {
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.status(401).json({
+      res.status(401).json({
         status: 'error',
         message: 'Invalid credentials',
         code: 'ERROR_INVALID_CREDENTIALS',
       });
+      return;
     }
     req.user = user;
     next();
