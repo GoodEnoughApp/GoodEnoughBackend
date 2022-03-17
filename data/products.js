@@ -14,7 +14,7 @@ const findUserProductUsingBarcode = async (barcode) => {
       barcode: barcode,
     },
   });
-  if (userProduct != null) {
+  if (userProduct !== null) {
     return { found: true, userProduct: userProduct.dataValues };
   } else {
     return { found: false };
@@ -30,7 +30,7 @@ const findProductUsingBarcode = async (barcode) => {
       barcode: barcode,
     },
   });
-  if (product != null) {
+  if (product !== null) {
     return { found: true, product: product.dataValues };
   } else {
     return { found: false };
@@ -164,7 +164,7 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
 const getUserProducts = async (categoryId = '') => {
   let allUserProducts;
   let where = {};
-  if (categoryId.trim() != '') {
+  if (categoryId.trim() !== '') {
     where.category_id = categoryId;
   }
   allUserProducts = await models.user_product.findAll({
