@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const models = require('../models/index');
+const nodemailer = require('nodemailer');
+const hbs = require('nodemailer-handlebars');
 
 // Insert a record
 async function insertUser(name, email, password, isActivated) {
@@ -33,7 +35,7 @@ async function checkEmail(email) {
 
 // return ID from Email
 async function getID(email) {
-  email = email.trim().toLowerCase();
+  email = email.toString().trim().toLowerCase();
   const getUser = await models.users
     .findOne({
       where: { email: email },
@@ -78,7 +80,7 @@ const checkUser = async (email, password) => {
   }
 };
 
-// set temp password - forget password
+// forget password
 async function tempPass(email) {
   if (!email) {
     throw new Error('Invalid or missing requirements');
@@ -97,6 +99,7 @@ async function tempPass(email) {
   return pass;
 }
 
+// Get random characters
 function getRandomString(length) {
   var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var result = '';
@@ -120,6 +123,7 @@ async function getUser(email) {
   return getUser;
 }
 
+// update: password - user name
 async function updateUser(userId, name, password) {
   if (!userId || !name || !password) {
     throw new Error('Invalid or missing requirements');
@@ -127,6 +131,57 @@ async function updateUser(userId, name, password) {
   const hashedpassword = await bcrypt.hash(password, 10);
 
   await models.users.update({ name: name, password: hashedpassword }, { where: { id: userId } });
+}
+
+// Start: Code added by Jose.
+function getActivationCode() {
+  return padLeadingZeros(randomNumber(0, 999999), 6);
+}
+
+function randomNumber(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function padLeadingZeros(num, size) {
+  let s = num + '';
+  while (s.length < size) s = '0' + s;
+  return s;
+}
+// end
+
+// Setup email
+function emailSetup(title, templateName, userName, email, code) {
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.Email,
+      pass: process.env.Password,
+    },
+  });
+  transporter.use(
+    'compile',
+    hbs({
+      viewEngine: {
+        extname: '.handlebars',
+        layoutsDir: './views/',
+        defaultLayout: templateName,
+      },
+      viewPath: './views/',
+    })
+  );
+  let mailOptions = {
+    from: process.env.Email,
+    to: email,
+    subject: title,
+    template: templateName,
+    context: {
+      userName: userName,
+      code: code,
+    },
+  };
+  transporter.sendMail(mailOptions);
+  return;
 }
 
 module.exports = {
@@ -138,5 +193,7 @@ module.exports = {
   tempPass,
   getUser,
   updateUser,
-  getRandomString,
+  getActivationCode,
+  emailSetup,
+  //getRandomString,
 };
