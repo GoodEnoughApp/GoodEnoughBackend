@@ -109,6 +109,7 @@ router.post('/login', async (req, res) => {
       const tokenValue = {
         userId: users.userId,
         email: email,
+        expiredAt: twoMonthsFromNow,
       };
       const authToken = jwt.sign(tokenValue, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: '60d',
@@ -231,6 +232,29 @@ router.put('/me', auth, async (req, res) => {
       message: 'Success',
       code: 'Success',
     });
+  } catch (e) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
+  }
+});
+// get user information
+router.get('/me', auth, async (req, res) => {
+  try {
+    const decoded = req.user;
+    const userInformation = await userData.getUser(decoded.email);
+    if (userInformation !== null) {
+      res.status(200).json({
+        status: 'success',
+        userId: userInformation.id,
+        name: userInformation.name,
+        email: userInformation.email,
+        expiredAt: decoded.expiredAt,
+      });
+      return;
+    }
   } catch (e) {
     return res.status(500).json({
       status: 'error',
