@@ -80,7 +80,7 @@ const addProduct = async (barcode, userId) => {
       if (upcProduct.found) {
         const addedUserProduct = await createUserProductUsingUPC(
           barcode,
-          upcProduct,
+          upcProduct.upcProduct,
           userId,
           product.product.category_id
         );
@@ -161,7 +161,7 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
 /**
  * This method is used to find product(s) in user_product table using categoryId as a param
  */
-const getUserProducts = async (categoryId) => {
+const getUserProducts = async (categoryId = '') => {
   let allUserProducts;
   let where = {};
   if (categoryId.trim() != '') {
@@ -271,7 +271,7 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
     quantity: parseInt(quantity),
     initial_quantity: 0,
     cost: parseFloat(cost),
-    is_used: true,
+    is_used: false,
   });
   if (addedItem === null) {
     return { itemAdded: false };
