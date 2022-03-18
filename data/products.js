@@ -2,6 +2,7 @@ const models = require('../models/index');
 const axios = require('axios');
 const categoryData = require('./category');
 require('dotenv').config();
+require('pg').defaults.parseInt8 = true;
 
 const baseURL = 'https://api.upcdatabase.org/product';
 
@@ -200,7 +201,7 @@ const getUserProductById = async (id) => {
       id: id,
     },
   });
-  if (productById == null) {
+  if (productById == null || productById.length === 0) {
     return { productsFound: false };
   } else {
     return { productsFound: true, productById: productById.dataValues };

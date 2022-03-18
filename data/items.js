@@ -1,4 +1,5 @@
 const models = require('../models/index');
+require('pg').defaults.parseInt8 = true;
 
 /**
  * This method is used to show items from item table based on product_id and used condition
