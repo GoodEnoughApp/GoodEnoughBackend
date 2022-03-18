@@ -40,7 +40,7 @@ module.exports = (sequelize) => {
   );
 
   Item.associate = (models) => {
-    Item.hasOne(models.user_product, { foreignKey: 'id' });
+    Item.belongsTo(models.user_product, { foreignKey: 'product_id', targetKey: 'id' });
   };
 
   syncUser(Item);

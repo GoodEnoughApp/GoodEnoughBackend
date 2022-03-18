@@ -39,7 +39,7 @@ router.put('/', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -61,7 +61,8 @@ router.get('/', auth, async (req, res) => {
       return;
     }
     try {
-      const allUserProducts = await productsData.getUserProducts(req.query.categoryId);
+      const userId = req.user.userId;
+      const allUserProducts = await productsData.getUserProducts(req.query.categoryId, userId);
       if (allUserProducts.productsFound) {
         res.status(200).json({
           products: allUserProducts.allUserProducts,
@@ -80,7 +81,7 @@ router.get('/', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -132,17 +133,11 @@ router.put('/custom', auth, async (req, res) => {
       return;
     }
     const decoded = req.user;
-    // const productExists = await productsData.findUserProductUsingBarcode(
-    //   barcode
-    // );
-    // if (productExists.found) {
-    //   res.status(409).json({
-    //     status: 'error',
-    //     message: 'Product exist',
-    //     code: 'ERROR_BARCODE_UNIQUE',
-    //   });
-    //   return;
-    // }
+    const productExists = await productsData.findUserProductUsingBarcode(barcode);
+    if (productExists.found) {
+      res.status(200).json({ product: productExists.userProduct, status: 'success' });
+      return;
+    }
     try {
       const addCustomProduct = await productsData.addCustomProduct(
         barcode,
@@ -173,7 +168,7 @@ router.put('/custom', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -247,7 +242,7 @@ router.post('/:productId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -318,8 +313,17 @@ router.get('/:productId', auth, async (req, res) => {
       });
       return;
     }
+    const userId = req.user.userId;
     const productById = await productsData.getUserProductById(req.params.productId);
     if (productById.productsFound) {
+      if (productById.productById.user_id !== userId) {
+        res.status(403).json({
+          status: 'error',
+          message: 'Not authorized to perform that action',
+          code: 'ERROR_NOT_ALLOWED',
+        });
+        return;
+      }
       res.status(200).json({
         product: productById.productById,
         status: 'success',
@@ -336,7 +340,7 @@ router.get('/:productId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -390,7 +394,7 @@ router.delete('/:productId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }

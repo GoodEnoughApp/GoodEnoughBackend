@@ -35,7 +35,8 @@ router.get('/', auth, async (req, res) => {
       });
       return;
     }
-    const allItems = await itemsData.getItems(req.query.productId, req.query.used);
+    const userId = req.user.userId;
+    const allItems = await itemsData.getItems(req.query.productId, req.query.used, userId);
     if (allItems.itemsFound) {
       res.status(200).json({
         items: allItems.allItems,
@@ -45,15 +46,15 @@ router.get('/', auth, async (req, res) => {
     } else {
       res.status(404).json({
         status: 'error',
-        message: 'Product not found',
-        code: 'ERROR_NOT_FOUND_PRODUCT',
+        message: 'Items not found',
+        code: 'ERROR_NOT_FOUND_ITEM',
       });
       return;
     }
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -164,7 +165,7 @@ router.put('/:itemId', auth, async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -212,7 +213,7 @@ router.get('/:itemId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -261,7 +262,7 @@ router.delete('/:itemId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }

@@ -2,6 +2,7 @@ const models = require('../models/index');
 const axios = require('axios');
 const categoryData = require('./category');
 require('dotenv').config();
+require('pg').defaults.parseInt8 = true;
 
 const baseURL = 'https://api.upcdatabase.org/product';
 
@@ -161,12 +162,13 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
 /**
  * This method is used to find product(s) in user_product table using categoryId as a param
  */
-const getUserProducts = async (categoryId = '') => {
+const getUserProducts = async (categoryId = '', userId) => {
   let allUserProducts;
   let where = {};
   if (categoryId.trim() !== '') {
     where.category_id = categoryId;
   }
+  where.user_id = userId;
   allUserProducts = await models.user_product.findAll({
     where: where,
   });
@@ -199,7 +201,7 @@ const getUserProductById = async (id) => {
       id: id,
     },
   });
-  if (productById == null) {
+  if (productById == null || productById.length === 0) {
     return { productsFound: false };
   } else {
     return { productsFound: true, productById: productById.dataValues };

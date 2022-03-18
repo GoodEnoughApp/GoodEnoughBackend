@@ -31,7 +31,7 @@ module.exports = (sequelize) => {
   );
 
   shopping.associate = (models) => {
-    shopping.hasOne(models.user_product, { foreignKey: 'id' });
+    shopping.belongsTo(models.user_product, { foreignKey: 'product_id', targetKey: 'id' });
   };
 
   syncUser(shopping);

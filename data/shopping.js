@@ -1,27 +1,45 @@
 const models = require('../models/index');
+require('pg').defaults.parseInt8 = true;
 
 const addShoppingItem = async (productId, quantity, cost) => {
   let currentDate = new Date().toISOString();
-  const addedShoppingItem = await models.shopping_list_item.create({
-    product_id: productId,
-    quantity: quantity,
-    cost: cost,
-    created_at: currentDate,
+  const addedShoppingItem = await models.shopping_list_item.findOrCreate({
+    where: {
+      product_id: productId,
+    },
+    defaults: {
+      product_id: productId,
+      quantity: quantity,
+      cost: cost,
+      created_at: currentDate,
+    },
   });
   return {
-    shoppingItem: addedShoppingItem.dataValues,
-    isNew: addedShoppingItem._options.isNewRecord,
+    shoppingItem: addedShoppingItem[0].dataValues,
+    isNew: addedShoppingItem[0]._options.isNewRecord,
   };
 };
 
 /**
  * This method is used to show all shopping items from shopping_list_item
  */
-const getShoppingItems = async () => {
-  const allItems = await models.shopping_list_item.findAll();
-  if (allItems == null) {
+const getShoppingItems = async (userId) => {
+  allItems = await models.shopping_list_item.findAll({
+    include: [
+      {
+        model: models.user_product,
+        where: {
+          user_id: userId,
+        },
+      },
+    ],
+  });
+  if (allItems == null || allItems.length === 0) {
     return { itemsFound: false };
   } else {
+    for (let index = 0; index < allItems.length; index++) {
+      delete allItems[index].dataValues['user_product'];
+    }
     return { itemsFound: true, allItems: allItems };
   }
 };
@@ -30,9 +48,6 @@ const getShoppingItems = async () => {
  * This method is used to find shopping item from shopping_list_item table
  */
 const getShoppingItemById = async (id) => {
-  if (!id) {
-    throw new Error('Invalid or missing requirements');
-  }
   const itemById = await models.shopping_list_item.findOne({
     where: {
       id: id,
