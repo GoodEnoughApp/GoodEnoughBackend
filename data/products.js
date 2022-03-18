@@ -90,6 +90,8 @@ const addProduct = async (barcode, userId) => {
           product: addedUserProduct,
           found: true,
         };
+      } else {
+        return { found: false };
       }
     } else {
       const upcProduct = await findUpcProductUsingBarcode(barcode);

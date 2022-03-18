@@ -86,13 +86,6 @@ router.get('/', auth, async (req, res) => {
         status: 'success',
       });
       return;
-    } else {
-      res.status(404).json({
-        status: 'error',
-        message: 'Items not found',
-        code: 'ERROR_NOT_FOUND_ITEM',
-      });
-      return;
     }
   } catch (error) {
     res.status(500).json({
