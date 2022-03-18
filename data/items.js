@@ -27,6 +27,9 @@ const getItems = async (productId = '', used = '', userId) => {
   if (allItems === null || allItems.length === 0) {
     return { itemsFound: false };
   } else {
+    for (let index = 0; index < allItems.length; index++) {
+      delete allItems[index].dataValues['user_product'];
+    }
     return { itemsFound: true, allItems: allItems };
   }
 };
