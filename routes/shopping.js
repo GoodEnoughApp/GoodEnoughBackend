@@ -1,5 +1,6 @@
 const express = require('express');
 const auth = require('../middlewares/jwtAuth');
+const verify = require('../middlewares/validation');
 const shoppingData = require('../data/shopping');
 const productsData = require('../data/products');
 const router = express.Router();
@@ -8,11 +9,26 @@ const router = express.Router();
 router.post('/', auth, async (req, res) => {
   try {
     const { productId, quantity, cost } = req.body;
-    if (productId === undefined || quantity === undefined || cost === undefined) {
+    if (
+      productId === undefined ||
+      quantity === undefined ||
+      cost === undefined ||
+      !verify.checkIfValidUUID(productId) ||
+      !verify.checkIsProperNumber(quantity) ||
+      !verify.checkIsProperNumber(cost)
+    ) {
       res.status(422).json({
         status: 'error',
         message: 'Missing required values',
         code: 'ERROR_MISSING_REQUIRED_VALUES',
+      });
+      return;
+    }
+    if (quantity < 0 || cost < 0) {
+      res.status(409).json({
+        status: 'error',
+        message: 'Negative numbers are invalid',
+        code: 'ERROR_NEGATIVE_NUMBERS',
       });
       return;
     }
@@ -34,14 +50,18 @@ router.post('/', auth, async (req, res) => {
       });
       return;
     } else {
-      const item = await shoppingData.addShoppingItem(productId, quantity, cost);
-      if (item.isNew) {
-        res.status(201).json({ item: item.shoppingItem, status: 'success' });
-      } else {
-        res.status(500).json({
+      try {
+        const item = await shoppingData.addShoppingItem(productId, quantity, cost);
+        if (item.isNew) {
+          res.status(201).json({ item: item.shoppingItem, status: 'success' });
+        } else {
+          res.status(200).json({ item: item.shoppingItem, status: 'success' });
+        }
+      } catch (error) {
+        res.status(409).json({
           status: 'error',
-          message: 'Server error',
-          code: 'ERROR_SERVER',
+          message: error.message,
+          code: 'ERROR',
         });
         return;
       }
@@ -58,11 +78,19 @@ router.post('/', auth, async (req, res) => {
 // To get all shopping list items
 router.get('/', auth, async (req, res) => {
   try {
-    const allItems = await shoppingData.getShoppingItems();
+    const userId = req.user.userId;
+    const allItems = await shoppingData.getShoppingItems(userId);
     if (allItems.itemsFound) {
       res.status(200).json({
         items: allItems.allItems,
         status: 'success',
+      });
+      return;
+    } else {
+      res.status(404).json({
+        status: 'error',
+        message: 'Items not found',
+        code: 'ERROR_NOT_FOUND_ITEM',
       });
       return;
     }
@@ -79,7 +107,13 @@ router.get('/', auth, async (req, res) => {
 router.put('/:itemId', auth, async (req, res) => {
   try {
     const { quantity, cost } = req.body;
-    if (quantity === undefined || cost === undefined) {
+    if (
+      !verify.checkIfValidUUID(req.params.itemId) ||
+      quantity === undefined ||
+      cost === undefined ||
+      !verify.checkIsProperNumber(quantity) ||
+      !verify.checkIsProperNumber(cost)
+    ) {
       res.status(422).json({
         status: 'error',
         message: 'Missing required values',
@@ -87,6 +121,15 @@ router.put('/:itemId', auth, async (req, res) => {
       });
       return;
     }
+    if (quantity < 0 || cost < 0) {
+      res.status(409).json({
+        status: 'error',
+        message: 'Negative numbers are invalid',
+        code: 'ERROR_NEGATIVE_NUMBERS',
+      });
+      return;
+    }
+    const userId = req.user.userId;
     const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
     if (!itemById.itemsFound) {
       res.status(404).json({
@@ -96,7 +139,6 @@ router.put('/:itemId', auth, async (req, res) => {
       });
       return;
     }
-    const userId = req.user.userId;
     const productById = await productsData.getUserProductById(itemById.itemById.product_id);
     if (productById.productsFound) {
       if (userId !== productById.productById.user_id) {
@@ -126,6 +168,14 @@ router.put('/:itemId', auth, async (req, res) => {
 // To get item using item id
 router.get('/:itemId', auth, async (req, res) => {
   try {
+    if (!verify.checkIfValidUUID(req.params.itemId)) {
+      res.status(422).json({
+        status: 'error',
+        message: 'Missing required values',
+        code: 'ERROR_MISSING_REQUIRED_VALUES',
+      });
+      return;
+    }
     const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
     if (itemById.itemsFound) {
       const userId = req.user.userId;
@@ -166,6 +216,14 @@ router.get('/:itemId', auth, async (req, res) => {
 // To delete an item
 router.delete('/:itemId', auth, async (req, res) => {
   try {
+    if (!verify.checkIfValidUUID(req.params.itemId)) {
+      res.status(422).json({
+        status: 'error',
+        message: 'Missing required values',
+        code: 'ERROR_MISSING_REQUIRED_VALUES',
+      });
+      return;
+    }
     const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
     if (!itemById.itemsFound) {
       res.status(404).json({
