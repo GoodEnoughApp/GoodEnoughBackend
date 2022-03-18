@@ -165,7 +165,7 @@ router.put('/:itemId', auth, async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -213,7 +213,7 @@ router.get('/:itemId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -262,7 +262,7 @@ router.delete('/:itemId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }

@@ -39,7 +39,7 @@ router.put('/', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -81,7 +81,7 @@ router.get('/', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -168,7 +168,7 @@ router.put('/custom', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -242,7 +242,7 @@ router.post('/:productId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -340,7 +340,7 @@ router.get('/:productId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -394,7 +394,7 @@ router.delete('/:productId', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
