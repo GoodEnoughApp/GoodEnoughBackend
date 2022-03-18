@@ -90,6 +90,8 @@ const addProduct = async (barcode, userId) => {
           product: addedUserProduct,
           found: true,
         };
+      } else {
+        return { found: false };
       }
     } else {
       const upcProduct = await findUpcProductUsingBarcode(barcode);
@@ -223,14 +225,14 @@ const addCustomProduct = async (
   userId
 ) => {
   try {
-    const addedProduct = await models.product.findOrCreate({
-      where: {
-        barcode: barcode,
-        barcode_type: 'EAN',
-        name: name,
-        category_id: categoryId,
-      },
-    });
+    // const addedProduct = await models.product.findOrCreate({
+    //   where: {
+    //     barcode: barcode,
+    //     barcode_type: 'EAN',
+    //     name: name,
+    //     category_id: categoryId,
+    //   },
+    // });
     const addedUserProduct = await models.user_product.findOrCreate({
       where: {
         user_id: userId,
