@@ -133,17 +133,11 @@ router.put('/custom', auth, async (req, res) => {
       return;
     }
     const decoded = req.user;
-    // const productExists = await productsData.findUserProductUsingBarcode(
-    //   barcode
-    // );
-    // if (productExists.found) {
-    //   res.status(409).json({
-    //     status: 'error',
-    //     message: 'Product exist',
-    //     code: 'ERROR_BARCODE_UNIQUE',
-    //   });
-    //   return;
-    // }
+    const productExists = await productsData.findUserProductUsingBarcode(barcode);
+    if (productExists.found) {
+      res.status(200).json({ product: productExists.userProduct, status: 'success' });
+      return;
+    }
     try {
       const addCustomProduct = await productsData.addCustomProduct(
         barcode,
