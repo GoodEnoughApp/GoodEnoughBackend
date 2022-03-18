@@ -9,7 +9,7 @@ const baseURL = 'https://api.upcdatabase.org/product';
 /**
  * This method is used to find product in user_product table using barcode as a param
  */
-const findUserProductUsingBarcode = async (barcode) => {
+const findUserProductUsingBarcode = async (barcode, userId) => {
   const userProduct = await models.user_product.findOne({
     where: {
       barcode: barcode,
