@@ -13,6 +13,7 @@ const findUserProductUsingBarcode = async (barcode) => {
   const userProduct = await models.user_product.findOne({
     where: {
       barcode: barcode,
+      user_id: userId,
     },
   });
   if (userProduct !== null) {
@@ -59,7 +60,7 @@ const findUpcProductUsingBarcode = async (barcode) => {
  * Found in UPC database ? insert category(if new) and insert result in product and user_product table and return record from user_product(201) : return product_id as null(201)
  */
 const addProduct = async (barcode, userId) => {
-  const userProduct = await findUserProductUsingBarcode(barcode);
+  const userProduct = await findUserProductUsingBarcode(barcode, userId);
   if (userProduct.found) {
     let tempCategoryId = userProduct.userProduct.category_id;
     let categoryById = await categoryData.getCategoryById(tempCategoryId);
