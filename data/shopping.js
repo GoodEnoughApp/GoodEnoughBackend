@@ -34,7 +34,7 @@ const getShoppingItems = async (userId) => {
       },
     ],
   });
-  if (allItems == null || allItems.length === 0) {
+  if (allItems == null) {
     return { itemsFound: false };
   } else {
     for (let index = 0; index < allItems.length; index++) {
