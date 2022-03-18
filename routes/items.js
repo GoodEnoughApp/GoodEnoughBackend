@@ -37,20 +37,11 @@ router.get('/', auth, async (req, res) => {
     }
     const userId = req.user.userId;
     const allItems = await itemsData.getItems(req.query.productId, req.query.used, userId);
-    if (allItems.itemsFound) {
-      res.status(200).json({
-        items: allItems.allItems,
-        status: 'success',
-      });
-      return;
-    } else {
-      res.status(404).json({
-        status: 'error',
-        message: 'Items not found',
-        code: 'ERROR_NOT_FOUND_ITEM',
-      });
-      return;
-    }
+    res.status(200).json({
+      items: allItems.allItems,
+      status: 'success',
+    });
+    return;
   } catch (error) {
     res.status(500).json({
       status: 'error',

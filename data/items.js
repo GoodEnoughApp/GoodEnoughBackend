@@ -24,7 +24,7 @@ const getItems = async (productId = '', used = '', userId) => {
     ],
     where: where,
   });
-  if (allItems === null || allItems.length === 0) {
+  if (allItems === null) {
     return { itemsFound: false };
   } else {
     for (let index = 0; index < allItems.length; index++) {
