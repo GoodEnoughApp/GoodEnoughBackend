@@ -321,37 +321,6 @@ const createUserProductFromProduct = async (userId, barcode, product) => {
   }
 };
 
-// const createUserProductFromProduct = async (
-//   userId,
-//   categoryId,
-//   barcode,
-//   barcodeType,
-//   name = '',
-//   alias = '',
-//   description = '',
-//   brand = '',
-//   manufacturer=''
-// ) => {
-//   try {
-//     const addedProduct = await models.user_product.findOrCreate({
-//       where: {
-//         user_id: userId,
-//         category_id: categoryId,
-//         barcode: barcode,
-//         barcode_type: barcodeType,
-//         name: name,
-//         alias: alias,
-//         description: description,
-//         brand: upcProduct.brand,
-//         manufacturer: upcProduct.manufacturer,
-//       },
-//     });
-//     return addedProduct[0].dataValues;
-//   } catch (error) {
-//     throw new Error(error);
-//   }
-// };
-
 module.exports = {
   addProduct,
   getUserProducts,

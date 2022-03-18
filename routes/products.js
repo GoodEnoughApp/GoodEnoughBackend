@@ -137,7 +137,7 @@ router.put('/custom', auth, async (req, res) => {
       return;
     }
     const decoded = req.user;
-    const productExists = await productsData.findUserProductUsingBarcode(barcode);
+    const productExists = await productsData.findUserProductUsingBarcode(barcode, decoded.userId);
     if (productExists.found) {
       res.status(200).json({ product: productExists.userProduct, status: 'success' });
       return;
