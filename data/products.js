@@ -56,7 +56,7 @@ const findUpcProductUsingBarcode = async (barcode) => {
  * This method is used to do an upsert using barcode
  * The method first checks for prodcut in user_product table
  * Found in user_product table ? return prodcut details(200) : check in product table
- * Found in product table ? return product_id(201) : check in UPC database
+ * Found in product table ? create in the user_product table(201) : check in UPC database
  * Found in UPC database ? insert category(if new) and insert result in product and user_product table and return record from user_product(201) : return product_id as null(201)
  */
 const addProduct = async (barcode, userId) => {
@@ -78,22 +78,24 @@ const addProduct = async (barcode, userId) => {
   } else {
     const product = await findProductUsingBarcode(barcode);
     if (product.found) {
-      const upcProduct = await findUpcProductUsingBarcode(barcode);
-      if (upcProduct.found) {
-        const addedUserProduct = await createUserProductUsingUPC(
-          barcode,
-          upcProduct.upcProduct,
-          userId,
-          product.product.category_id
-        );
-        return {
-          type: 'PRODUCT',
-          product: addedUserProduct,
-          found: true,
-        };
-      } else {
-        return { found: false };
-      }
+      const userProductCreated = await createUserProductFromProduct(
+        userId,
+        barcode,
+        product.product
+      );
+      let tempCategoryId = userProductCreated.category_id;
+      let categoryById = await categoryData.getCategoryById(tempCategoryId);
+      userProductCreated.category = {
+        id: categoryById.categoryById.id,
+        name: categoryById.categoryById.name,
+      };
+      delete userProductCreated['category_id'];
+      delete userProductCreated['user_id'];
+      return {
+        type: 'PRODUCT',
+        product: userProductCreated,
+        found: true,
+      };
     } else {
       const upcProduct = await findUpcProductUsingBarcode(barcode);
       if (upcProduct.found) {
@@ -297,6 +299,58 @@ const deleteProduct = async (productId) => {
     return { delete: false };
   }
 };
+
+const createUserProductFromProduct = async (userId, barcode, product) => {
+  try {
+    const addedProduct = await models.user_product.findOrCreate({
+      where: {
+        user_id: userId,
+        category_id: product.category_id,
+        barcode: barcode,
+        barcode_type: product.barcode_type,
+        name: product.name,
+        alias: product.alias !== undefined ? product.alias : '',
+        description: product.description !== undefined ? product.description : '',
+        brand: product.brand !== undefined ? product.brand : '',
+        manufacturer: product.manufacturer !== undefined ? product.manufacturer : '',
+      },
+    });
+    return addedProduct[0].dataValues;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+// const createUserProductFromProduct = async (
+//   userId,
+//   categoryId,
+//   barcode,
+//   barcodeType,
+//   name = '',
+//   alias = '',
+//   description = '',
+//   brand = '',
+//   manufacturer=''
+// ) => {
+//   try {
+//     const addedProduct = await models.user_product.findOrCreate({
+//       where: {
+//         user_id: userId,
+//         category_id: categoryId,
+//         barcode: barcode,
+//         barcode_type: barcodeType,
+//         name: name,
+//         alias: alias,
+//         description: description,
+//         brand: upcProduct.brand,
+//         manufacturer: upcProduct.manufacturer,
+//       },
+//     });
+//     return addedProduct[0].dataValues;
+//   } catch (error) {
+//     throw new Error(error);
+//   }
+// };
 
 module.exports = {
   addProduct,

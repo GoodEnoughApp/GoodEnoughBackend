@@ -22,7 +22,11 @@ router.put('/', auth, async (req, res) => {
       if (addProduct.found) {
         if (addProduct.type === 'USER_PRODUCT') {
           res.status(200).json({ product: addProduct.product, status: 'success' });
-        } else {
+        }
+        // else if (addProduct.type === 'PRODUCT') {
+        //   res.status(201).json({ product: addProduct.product, status: 'success' });
+        // }
+        else {
           res.status(201).json({ productId: addProduct.product.id, status: 'success' });
         }
       } else {
