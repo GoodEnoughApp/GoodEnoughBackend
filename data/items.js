@@ -3,7 +3,7 @@ const models = require('../models/index');
 /**
  * This method is used to show items from item table based on product_id and used condition
  */
-const getItems = async (productId = '', used = '') => {
+const getItems = async (productId = '', used = '', userId) => {
   let allItems;
   let where = {};
   if (productId !== '') {
@@ -13,6 +13,14 @@ const getItems = async (productId = '', used = '') => {
     where.is_used = used;
   }
   allItems = await models.Item.findAll({
+    include: [
+      {
+        model: models.user_product,
+        where: {
+          user_id: userId,
+        },
+      },
+    ],
     where: where,
   });
   if (allItems === null || allItems.length === 0) {
