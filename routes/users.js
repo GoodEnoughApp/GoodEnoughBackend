@@ -244,7 +244,7 @@ router.put('/me', auth, async (req, res) => {
 router.get('/me', auth, async (req, res) => {
   try {
     const decoded = req.user;
-    const userInformation = await userData.getUser(decoded.email);
+    const userInformation = await userData.getUserById(decoded.userId);
     if (userInformation !== null) {
       res.status(200).json({
         status: 'success',
@@ -254,11 +254,18 @@ router.get('/me', auth, async (req, res) => {
         expiredAt: decoded.expiredAt,
       });
       return;
+    } else {
+      res.status(401).json({
+        status: 'error',
+        message: 'Invalid credentials',
+        code: 'ERROR_INVALID_CREDENTIALS',
+      });
+      return;
     }
   } catch (e) {
     return res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: e.message,
       code: 'ERROR_SERVER',
     });
   }
