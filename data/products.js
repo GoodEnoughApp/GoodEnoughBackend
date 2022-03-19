@@ -177,7 +177,7 @@ const getUserProducts = async (categoryId = '', userId) => {
   allUserProducts = await models.user_product.findAll({
     where: where,
   });
-  if (allUserProducts == null) {
+  if (allUserProducts === null) {
     return { productsFound: false };
   } else {
     for (let index = 0; index < allUserProducts.length; index++) {
@@ -206,7 +206,7 @@ const getUserProductById = async (id) => {
       id: id,
     },
   });
-  if (productById == null) {
+  if (productById === null) {
     return { productsFound: false };
   } else {
     let tempCategoryId = productById.dataValues.category_id;
