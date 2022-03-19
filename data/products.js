@@ -206,9 +206,16 @@ const getUserProductById = async (id) => {
       id: id,
     },
   });
-  if (productById == null || productById.length === 0) {
+  if (productById == null) {
     return { productsFound: false };
   } else {
+    let tempCategoryId = productById.dataValues.category_id;
+    let categoryById = await categoryData.getCategoryById(tempCategoryId);
+    productById.dataValues.category = {
+      id: categoryById.categoryById.id,
+      name: categoryById.categoryById.name,
+    };
+    delete productById.dataValues['category_id'];
     return { productsFound: true, productById: productById.dataValues };
   }
 };
