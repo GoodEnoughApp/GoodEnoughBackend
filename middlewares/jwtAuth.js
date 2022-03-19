@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-
+const userData = require('../data/users');
 require('dotenv').config();
 
 const verifyToken = (req, res, next) => {
@@ -12,7 +12,7 @@ const verifyToken = (req, res, next) => {
       code: 'ERROR_INVALID_CREDENTIALS',
     });
   }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
     if (err) {
       res.status(401).json({
         status: 'error',
@@ -20,6 +20,17 @@ const verifyToken = (req, res, next) => {
         code: 'ERROR_INVALID_CREDENTIALS',
       });
       return;
+    }
+    if (user && user.userId) {
+      const userExists = await userData.getUserById(user.userId);
+      if (userExists === null) {
+        res.status(401).json({
+          status: 'error',
+          message: 'Invalid credentials',
+          code: 'ERROR_INVALID_CREDENTIALS',
+        });
+        return;
+      }
     }
     req.user = user;
     next();

@@ -328,6 +328,7 @@ router.get('/:productId', auth, async (req, res) => {
         });
         return;
       }
+      delete productById.productById['user_id'];
       res.status(200).json({
         product: productById.productById,
         status: 'success',
