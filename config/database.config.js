@@ -13,6 +13,7 @@ module.exports = {
       ssl: {
         // For secure connection:
         ca: process.env.DB_CRT,
+        rejectUnauthorized: false,
       },
     },
   },
@@ -28,6 +29,7 @@ module.exports = {
       ssl: {
         // For secure connection:
         ca: process.env.DB_CRT,
+        rejectUnauthorized: false,
       },
     },
   },
@@ -43,6 +45,7 @@ module.exports = {
       ssl: {
         // For secure connection:
         ca: process.env.DB_CRT,
+        rejectUnauthorized: false,
       },
     },
   },
@@ -58,6 +61,7 @@ module.exports = {
       ssl: {
         // For secure connection:
         ca: process.env.DB_CRT,
+        rejectUnauthorized: false,
       },
     },
   },
