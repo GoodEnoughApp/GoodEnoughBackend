@@ -143,6 +143,7 @@ function randomNumber(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
 function padLeadingZeros(num, size) {
   let s = num + '';
   while (s.length < size) s = '0' + s;
@@ -184,6 +185,19 @@ function emailSetup(title, templateName, userName, email, code) {
   return;
 }
 
+const getUserById = async (userId) => {
+  const user = await models.users
+    .findOne({
+      where: {
+        id: userId,
+      },
+    })
+    .catch((err) => {
+      throw `error: ${err.message}`;
+    });
+  return user;
+};
+
 module.exports = {
   insertUser,
   checkEmail,
@@ -195,5 +209,6 @@ module.exports = {
   updateUser,
   getActivationCode,
   emailSetup,
+  getUserById,
   //getRandomString,
 };

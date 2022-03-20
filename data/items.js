@@ -1,23 +1,35 @@
 const models = require('../models/index');
+require('pg').defaults.parseInt8 = true;
 
 /**
  * This method is used to show items from item table based on product_id and used condition
  */
-const getItems = async (productId, used) => {
+const getItems = async (productId = '', used = '', userId) => {
   let allItems;
   let where = {};
-  if (productId != '') {
+  if (productId !== '') {
     where.product_id = productId;
   }
-  if (used != false) {
+  if (used !== '') {
     where.is_used = used;
   }
   allItems = await models.Item.findAll({
+    include: [
+      {
+        model: models.user_product,
+        where: {
+          user_id: userId,
+        },
+      },
+    ],
     where: where,
   });
-  if (allItems == null) {
+  if (allItems === null) {
     return { itemsFound: false };
   } else {
+    for (let index = 0; index < allItems.length; index++) {
+      delete allItems[index].dataValues['user_product'];
+    }
     return { itemsFound: true, allItems: allItems };
   }
 };

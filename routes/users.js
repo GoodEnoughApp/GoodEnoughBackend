@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const userData = require('../data/users');
 const codeData = require('../data/verificationCodes');
 const auth = require('../middlewares/jwtAuth');
+const verify = require('../middlewares/validation');
 
 // user sign up
 router.post('/register', async (req, res) => {
@@ -66,14 +67,17 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     try {
-      if (!req.body || req.body.email.trim() === '' || req.body.password.trim() === '') {
+      if (
+        !req.body ||
+        !verify.validEmail(req.body.email) ||
+        !verify.validString(req.body.password)
+      ) {
         throw new Error('Missing required values');
       }
-      // userData.checkPassword(req.body.password);
     } catch (error) {
       res.status(422).json({
         status: 'error',
-        message: error,
+        message: error.message,
         code: 'ERROR_MISSING_REQUIRED_VALUES',
       });
       return;
@@ -100,13 +104,16 @@ router.post('/login', async (req, res) => {
     }
     if (users.authenticated === true) {
       const d = new Date();
-      let twoMonthsFromNow = d.setMonth(d.getMonth() + 2);
+      let twoMonthsFromNow = d.setDate(d.getDate() + 60);
       twoMonthsFromNow = new Date(twoMonthsFromNow).toISOString();
       const tokenValue = {
         userId: users.userId,
         email: email,
+        expiredAt: twoMonthsFromNow,
       };
-      const authToken = jwt.sign(tokenValue, process.env.ACCESS_TOKEN_SECRET);
+      const authToken = jwt.sign(tokenValue, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '60d',
+      });
       res.status(200).json({
         authToken: authToken,
         expiredAt: twoMonthsFromNow,
@@ -116,7 +123,7 @@ router.post('/login', async (req, res) => {
   } catch (e) {
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: error.message,
       code: 'ERROR_SERVER',
     });
   }
@@ -229,6 +236,36 @@ router.put('/me', auth, async (req, res) => {
     return res.status(500).json({
       status: 'error',
       message: 'Server error',
+      code: 'ERROR_SERVER',
+    });
+  }
+});
+// get user information
+router.get('/me', auth, async (req, res) => {
+  try {
+    const decoded = req.user;
+    const userInformation = await userData.getUserById(decoded.userId);
+    if (userInformation !== null) {
+      res.status(200).json({
+        status: 'success',
+        userId: userInformation.id,
+        name: userInformation.name,
+        email: userInformation.email,
+        expiredAt: decoded.expiredAt,
+      });
+      return;
+    } else {
+      res.status(401).json({
+        status: 'error',
+        message: 'Invalid credentials',
+        code: 'ERROR_INVALID_CREDENTIALS',
+      });
+      return;
+    }
+  } catch (e) {
+    return res.status(500).json({
+      status: 'error',
+      message: e.message,
       code: 'ERROR_SERVER',
     });
   }

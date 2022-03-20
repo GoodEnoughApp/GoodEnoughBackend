@@ -52,7 +52,8 @@ module.exports = (sequelize) => {
     userProduct.belongsTo(models.Category, { foreignKey: 'category_id' });
     userProduct.belongsTo(models.product, { foreignKey: 'barcode' });
     userProduct.belongsTo(models.users, { foreignKey: 'user_id' });
-    userProduct.belongsTo(models.Item, { foreignKey: 'id' });
+    userProduct.hasMany(models.Item, { foreignKey: 'product_id', sourceKey: 'id' });
+    userProduct.hasMany(models.shopping_list_item, { foreignKey: 'product_id', sourceKey: 'id' });
   };
 
   syncUser(userProduct);

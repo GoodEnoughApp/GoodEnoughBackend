@@ -2,19 +2,21 @@ const models = require('../models/index');
 const axios = require('axios');
 const categoryData = require('./category');
 require('dotenv').config();
+require('pg').defaults.parseInt8 = true;
 
 const baseURL = 'https://api.upcdatabase.org/product';
 
 /**
  * This method is used to find product in user_product table using barcode as a param
  */
-const findUserProductUsingBarcode = async (barcode) => {
+const findUserProductUsingBarcode = async (barcode, userId) => {
   const userProduct = await models.user_product.findOne({
     where: {
       barcode: barcode,
+      user_id: userId,
     },
   });
-  if (userProduct != null) {
+  if (userProduct !== null) {
     return { found: true, userProduct: userProduct.dataValues };
   } else {
     return { found: false };
@@ -30,7 +32,7 @@ const findProductUsingBarcode = async (barcode) => {
       barcode: barcode,
     },
   });
-  if (product != null) {
+  if (product !== null) {
     return { found: true, product: product.dataValues };
   } else {
     return { found: false };
@@ -54,11 +56,11 @@ const findUpcProductUsingBarcode = async (barcode) => {
  * This method is used to do an upsert using barcode
  * The method first checks for prodcut in user_product table
  * Found in user_product table ? return prodcut details(200) : check in product table
- * Found in product table ? return product_id(201) : check in UPC database
+ * Found in product table ? create in the user_product table(201) : check in UPC database
  * Found in UPC database ? insert category(if new) and insert result in product and user_product table and return record from user_product(201) : return product_id as null(201)
  */
 const addProduct = async (barcode, userId) => {
-  const userProduct = await findUserProductUsingBarcode(barcode);
+  const userProduct = await findUserProductUsingBarcode(barcode, userId);
   if (userProduct.found) {
     let tempCategoryId = userProduct.userProduct.category_id;
     let categoryById = await categoryData.getCategoryById(tempCategoryId);
@@ -76,9 +78,22 @@ const addProduct = async (barcode, userId) => {
   } else {
     const product = await findProductUsingBarcode(barcode);
     if (product.found) {
+      const userProductCreated = await createUserProductFromProduct(
+        userId,
+        barcode,
+        product.product
+      );
+      let tempCategoryId = userProductCreated.category_id;
+      let categoryById = await categoryData.getCategoryById(tempCategoryId);
+      userProductCreated.category = {
+        id: categoryById.categoryById.id,
+        name: categoryById.categoryById.name,
+      };
+      delete userProductCreated['category_id'];
+      delete userProductCreated['user_id'];
       return {
         type: 'PRODUCT',
-        product: product.product,
+        product: userProductCreated,
         found: true,
       };
     } else {
@@ -88,6 +103,7 @@ const addProduct = async (barcode, userId) => {
           upcProduct.upcProduct.category.toLowerCase()
         );
         const createdProduct = await createProductUsingUPC(
+          barcode,
           upcProduct.upcProduct,
           userId,
           category[0].dataValues.id
@@ -107,22 +123,17 @@ const addProduct = async (barcode, userId) => {
 /**
  * This method is used to insert record form UPC database into the product table
  */
-const createProductUsingUPC = async (upcProduct, userId, categoryId) => {
+const createProductUsingUPC = async (barcode, upcProduct, userId, categoryId) => {
   try {
     const addedProduct = await models.product.findOrCreate({
       where: {
-        barcode: upcProduct.barcode,
+        barcode: barcode,
         barcode_type: 'UPC',
         name: upcProduct.title,
         category_id: categoryId,
       },
     });
-    const addedUserProduct = createUserProductUsingUPC(
-      upcProduct,
-      userId,
-      categoryId,
-      addedProduct[0].dataValues
-    );
+    const addedUserProduct = createUserProductUsingUPC(barcode, upcProduct, userId, categoryId);
     return addedUserProduct;
   } catch (error) {
     console.log(error);
@@ -132,13 +143,13 @@ const createProductUsingUPC = async (upcProduct, userId, categoryId) => {
 /**
  * This method is used to insert record from UPC databse to user_product table
  */
-const createUserProductUsingUPC = async (upcProduct, userId, categoryId, addedProductData) => {
+const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId) => {
   try {
     const addedProduct = await models.user_product.findOrCreate({
       where: {
         user_id: userId,
         category_id: categoryId,
-        barcode: addedProductData.barcode,
+        barcode: barcode,
         barcode_type: 'UPC',
         name: upcProduct.title,
         alias: upcProduct.alias,
@@ -156,16 +167,17 @@ const createUserProductUsingUPC = async (upcProduct, userId, categoryId, addedPr
 /**
  * This method is used to find product(s) in user_product table using categoryId as a param
  */
-const getUserProducts = async (categoryId) => {
+const getUserProducts = async (categoryId = '', userId) => {
   let allUserProducts;
   let where = {};
-  if (categoryId.trim() != '') {
+  if (categoryId.trim() !== '') {
     where.category_id = categoryId;
   }
+  where.user_id = userId;
   allUserProducts = await models.user_product.findAll({
     where: where,
   });
-  if (allUserProducts == null) {
+  if (allUserProducts === null) {
     return { productsFound: false };
   } else {
     for (let index = 0; index < allUserProducts.length; index++) {
@@ -194,9 +206,16 @@ const getUserProductById = async (id) => {
       id: id,
     },
   });
-  if (productById == null) {
+  if (productById === null) {
     return { productsFound: false };
   } else {
+    let tempCategoryId = productById.dataValues.category_id;
+    let categoryById = await categoryData.getCategoryById(tempCategoryId);
+    productById.dataValues.category = {
+      id: categoryById.categoryById.id,
+      name: categoryById.categoryById.name,
+    };
+    delete productById.dataValues['category_id'];
     return { productsFound: true, productById: productById.dataValues };
   }
 };
@@ -266,7 +285,7 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
     quantity: parseInt(quantity),
     initial_quantity: 0,
     cost: parseFloat(cost),
-    is_used: true,
+    is_used: false,
   });
   if (addedItem === null) {
     return { itemAdded: false };
@@ -285,6 +304,27 @@ const deleteProduct = async (productId) => {
     return { delete: true };
   } else {
     return { delete: false };
+  }
+};
+
+const createUserProductFromProduct = async (userId, barcode, product) => {
+  try {
+    const addedProduct = await models.user_product.findOrCreate({
+      where: {
+        user_id: userId,
+        category_id: product.category_id,
+        barcode: barcode,
+        barcode_type: product.barcode_type,
+        name: product.name,
+        alias: product.alias !== undefined ? product.alias : '',
+        description: product.description !== undefined ? product.description : '',
+        brand: product.brand !== undefined ? product.brand : '',
+        manufacturer: product.manufacturer !== undefined ? product.manufacturer : '',
+      },
+    });
+    return addedProduct[0].dataValues;
+  } catch (error) {
+    throw new Error(error);
   }
 };
 
