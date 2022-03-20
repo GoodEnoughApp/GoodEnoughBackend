@@ -63,24 +63,35 @@ describe('ADD A CUSTOM PRODUCT', () => {
   });
 });
 
-let itemId;
-describe('ADD AN ITEM TO A PRODUCT', () => {
-  const d = new Date();
-  let tempExpiryDate = d.setMonth(d.getMonth() + 2);
-  it('should add an item to a product', async () => {
+describe('GET PRODUCT BY ID', () => {
+  it('should allow to get product details by ID', async () => {
     const res = await request(app)
-      .post(`/products/${productId}`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        expirationDate: tempExpiryDate,
-        quantity: 1,
-        cost: 15,
-      });
-    expect(res.body.status).toEqual('success');
-    expect(res.body).toHaveProperty('item');
-    itemId = res.body.item.id;
+      .get(`/products/${productId}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('product');
   });
 });
+
+let itemId;
+// describe('ADD AN ITEM TO A PRODUCT', () => {
+const d = new Date();
+let tempExpiryDate = d.setMonth(d.getMonth() + 2);
+tempExpiryDate = new Date(tempExpiryDate).toISOString();
+it('should add an item to a product', async () => {
+  const res = await request(app)
+    .post(`/products/${productId}`)
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      expirationDate: tempExpiryDate,
+      quantity: 1,
+      cost: 15,
+    });
+  expect(res.body.status).toEqual('success');
+  expect(res.body).toHaveProperty('item');
+  itemId = res.body.item.id;
+});
+// });
 
 describe('ADD A PRODUCT THAT ALREADY EXISTS', () => {
   it('should return the above created product', async () => {
@@ -88,16 +99,6 @@ describe('ADD A PRODUCT THAT ALREADY EXISTS', () => {
       barcode: '0073852013337',
     });
     expect(res.body.status).toEqual('success');
-    expect(res.body).toHaveProperty('product');
-  });
-});
-
-describe('GET PRODUCT BY ID', () => {
-  it('should allow to get product details by ID', async () => {
-    const res = await request(app)
-      .get(`/products/${productId}`)
-      .set('Authorization', `Bearer ${token}`);
-    expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty('product');
   });
 });
@@ -110,21 +111,15 @@ describe('GET ALL ITEMS', () => {
   });
 });
 
-describe('GET ITEM BY ID', () => {
-  it('should allow to get item details by ID', async () => {
-    const res = await request(app).get(`/items/${itemId}`).set('Authorization', `Bearer ${token}`);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('item');
-  });
+it('should allow to get item details by ID', async () => {
+  const res = await request(app).get(`/items/${itemId}`).set('Authorization', `Bearer ${token}`);
+  expect(res.statusCode).toEqual(200);
+  expect(res.body).toHaveProperty('item');
 });
 
-describe('DELETE ITEM BY ID', () => {
-  it('should allow to delete an item', async () => {
-    const res = await request(app)
-      .delete(`/items/${itemId}`)
-      .set('Authorization', `Bearer ${token}`);
-    expect(res.body.status).toEqual('success');
-  });
+it('should allow to delete an item', async () => {
+  const res = await request(app).delete(`/items/${itemId}`).set('Authorization', `Bearer ${token}`);
+  expect(res.body.status).toEqual('success');
 });
 
 let shoppingItemId;

@@ -16,8 +16,8 @@ app.use(
 // model.shopping_list_item.findAll().then((data) => console.log(data));
 configRoutes(app);
 app.use(express.urlencoded({ extended: true }));
-app.listen(process.env.PORT || 3000, () => {
+const server = app.listen(process.env.PORT || 3000, () => {
   console.log("We've now got a server!");
 });
 
-module.exports = app;
+module.exports = server;
