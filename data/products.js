@@ -102,6 +102,19 @@ const addProduct = async (barcode, userId) => {
         const category = await categoryData.addCategory(
           upcProduct.upcProduct.category.toLowerCase()
         );
+        if (
+          upcProduct.upcProduct.title !== undefined &&
+          upcProduct.upcProduct.title.trim() === ''
+        ) {
+          if (
+            upcProduct.upcProduct.description !== undefined &&
+            upcProduct.upcProduct.description.trim() === ''
+          ) {
+            upcProduct.upcProduct.title = 'GoodEnough Item';
+          } else {
+            upcProduct.upcProduct.title = upcProduct.upcProduct.description.trim();
+          }
+        }
         const createdProduct = await createProductUsingUPC(
           barcode,
           upcProduct.upcProduct,
