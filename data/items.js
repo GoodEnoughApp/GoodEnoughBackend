@@ -1,5 +1,7 @@
 const models = require('../models/index');
 require('pg').defaults.parseInt8 = true;
+const moment = require('moment');
+const { Op } = require('sequelize');
 
 /**
  * This method is used to show items from item table based on product_id and used condition
@@ -93,9 +95,89 @@ const deleteItem = async (itemId) => {
   }
 };
 
+/**
+ * This method is used to show item report
+ */
+ const getReport = async (userId, startDate='', endDate='') => {
+  let allItems;
+  var sDate;
+  var eDate;
+  if(startDate !== '' && endDate!== '')
+  {
+    sDate = new Date(startDate);
+    eDate = new Date(endDate);
+    sDate =  moment(sDate).format('YYYY-MM-DD');
+    eDate =  moment(eDate).format('YYYY-MM-DD');
+    allItems = await models.Item.findAll({
+      include: [
+        {
+          model: models.user_product,
+          where: {
+           user_id: userId,
+          },
+        },
+      ],
+      where: { 
+      expiration_date: {
+      [Op.between]: [sDate, eDate]
+            }
+            }
+    });
+  }
+  else if(startDate !== '')
+  {
+    sDate = new Date(startDate);
+    sDate =  moment(sDate).format('YYYY-MM-DD');
+    allItems = await models.Item.findAll({
+      include: [
+        {
+          model: models.user_product,
+          where: {
+           user_id: userId,
+          },
+        },
+      ],
+      where: { is_used: false,
+      expiration_date: {
+        [Op.gte]: sDate
+             }
+            }
+    });
+  }
+  else
+  {
+    eDate = new Date(endDate);
+    eDate =  moment(eDate).format('YYYY-MM-DD');
+    allItems = await models.Item.findAll({
+      include: [
+        {
+          model: models.user_product,
+          where: {
+           user_id: userId,
+          },
+        },
+      ],
+      where: { is_used: false,
+      expiration_date: {
+        [Op.lte]: eDate
+             }
+            }
+    });
+  }
+  if (allItems === null) {
+    return { itemsFound: false };
+  } else {
+    for (let index = 0; index < allItems.length; index++) {
+      delete allItems[index].dataValues['user_product'];
+    }
+    return { itemsFound: true, allItems: allItems };
+  }
+};
+
 module.exports = {
   getItems,
   getItemById,
   updateItem,
   deleteItem,
+  getReport,
 };
