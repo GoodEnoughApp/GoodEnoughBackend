@@ -252,58 +252,73 @@ router.post('/:productId', auth, async (req, res) => {
   }
 });
 
-// router.put('/:productId', auth, async (req, res) => {
-//   try {
-//     const {
-//       barcode,
-//       name,
-//       alias,
-//       description,
-//       brand,
-//       manufacturer,
-//       categoryId,
-//     } = req.body;
-//     if (
-//       barcode === undefined ||
-//       name === undefined ||
-//       alias === undefined ||
-//       description === undefined ||
-//       brand === undefined ||
-//       manufacturer === undefined ||
-//       categoryId === undefined ||
-//       barcode.trim() === '' ||
-//       name.trim() === '' ||
-//       alias.trim() === '' ||
-//       description.trim() === '' ||
-//       brand.trim() === '' ||
-//       manufacturer.trim() === '' ||
-//       categoryId.trim() === ''
-//     ) {
-//       res.status(422).json({
-//         status: 'error',
-//         message: 'Missing required values',
-//         code: 'ERROR_MISSING_REQUIRED_VALUES',
-//       });
-//     }
-//     const getProductDataById = await productsData.getUserProductById(
-//       req.params.productId
-//     );
-//     if (!getProductDataById.productsFound) {
-//       res.status(404).json({
-//         status: 'error',
-//         message: 'Product not found',
-//         code: 'ERROR_NOT_FOUND_PRODUCT',
-//       });
-//       return;
-//     }
-//   } catch (error) {
-//     res.status(500).json({
-//       status: 'error',
-//       message: 'Server error',
-//       code: 'ERROR_SERVER',
-//     });
-//   }
-// });
+// Update a product
+router.put('/:productId', auth, async (req, res) => {
+  try {
+    if (!verify.checkIfValidUUID(req.params.productId)) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Bad Request',
+        code: 'BAD_REQUEST',
+      });
+      return;
+    }
+    const { barcode, name, alias, description, brand, manufacturer, categoryId } = req.body;
+    if (
+      !verify.validString(barcode) ||
+      !verify.validString(name) ||
+      !verify.validStringEmpty(alias) ||
+      !verify.validStringEmpty(description) ||
+      !verify.validStringEmpty(brand) ||
+      !verify.validStringEmpty(manufacturer) ||
+      !verify.checkIfValidUUID(categoryId)
+    ) {
+      res.status(422).json({
+        status: 'error',
+        message: 'Missing required values',
+        code: 'ERROR_MISSING_REQUIRED_VALUES',
+      });
+      return;
+    }
+    const userId = req.user.userId;
+    const updateProduct = await productsData.updateProduct(
+      req.params.productId,
+      userId,
+      barcode,
+      name,
+      alias,
+      description,
+      brand,
+      manufacturer,
+      categoryId
+    );
+    if (updateProduct.barcodeExists) {
+      res.status(409).json({
+        status: 'error',
+        message: 'Product exist',
+        code: 'ERROR_BARCODE_UNIQUE',
+      });
+      return;
+    }
+    if (!updateProduct.categoryFound) {
+      res.status(422).json({
+        status: 'error',
+        message: 'Wrong Category Id',
+        code: 'ERROR_CATEGORY_NOT_EXIST',
+      });
+      return;
+    }
+    if (updateProduct.productUpdated) {
+      res.status(200).json({ product: updateProduct.product, status: 'success' });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+      code: 'ERROR_SERVER',
+    });
+  }
+});
 
 // Get a particular product using product_id from user_product table
 
