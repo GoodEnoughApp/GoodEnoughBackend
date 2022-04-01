@@ -117,7 +117,7 @@ const deleteItem = async (itemId) => {
           },
         },
       ],
-      where: { 
+      where: { is_used: false,
       expiration_date: {
       [Op.between]: [sDate, eDate]
             }
