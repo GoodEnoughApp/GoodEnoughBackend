@@ -200,8 +200,8 @@ const getUserProducts = async (categoryId = '', userId) => {
         id: categoryById.categoryById.id,
         name: categoryById.categoryById.name,
       };
-      delete allUserProducts[index]['category_id'];
-      delete allUserProducts[index]['user_id'];
+      delete allUserProducts[index].dataValues['category_id'];
+      delete allUserProducts[index].dataValues['user_id'];
     }
     return { productsFound: true, allUserProducts: allUserProducts };
   }
@@ -341,6 +341,49 @@ const createUserProductFromProduct = async (userId, barcode, product) => {
   }
 };
 
+const updateProduct = async (
+  productId,
+  userId,
+  barcode,
+  name,
+  alias,
+  description,
+  brand,
+  manufacturer,
+  categoryId
+) => {
+  const product = await findUserProductUsingBarcode(barcode, userId);
+  if (product.found && product.userProduct.id !== productId) {
+    return { barcodeExists: true };
+  }
+  const categoryCheck = await categoryData.getCategoryById(categoryId);
+  if (!categoryCheck.categoryFound) {
+    return { categoryFound: false };
+  }
+  if (product.found && product.userProduct.id !== productId) {
+    return { barcodeExists: true };
+  }
+  const updatedProduct = await models.user_product.update(
+    {
+      barcode: barcode,
+      name: name,
+      alias: alias,
+      description: description,
+      brand: brand,
+      manufacturer: manufacturer,
+      category_id: categoryId,
+    },
+    {
+      where: {
+        id: productId,
+        user_id: userId,
+      },
+    }
+  );
+  const productById = await getUserProductById(productId);
+  return { productUpdated: true, product: productById.productById };
+};
+
 module.exports = {
   addProduct,
   getUserProducts,
@@ -349,4 +392,5 @@ module.exports = {
   findUserProductUsingBarcode,
   addToItem,
   deleteProduct,
+  updateProduct,
 };

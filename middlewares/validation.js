@@ -2,6 +2,10 @@ function validString(str) {
   if (!str || typeof str !== 'string' || !str.trim()) return false;
   return true;
 }
+function validStringEmpty(str) {
+  if (typeof str !== 'string') return false;
+  return true;
+}
 
 function validBoolean(bool) {
   if (typeof bool !== 'boolean') return false;
@@ -45,4 +49,5 @@ module.exports = {
   checkIfValidUUID,
   checkIsProperNumber,
   validIsoDate,
+  validStringEmpty,
 };
