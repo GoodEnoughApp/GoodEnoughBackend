@@ -5,7 +5,8 @@ const itemsData = require('../data/items');
 const productsData = require('../data/products');
 const router = express.Router();
 
-// To get item from item table based on product_id and used condition
+// To get item from item table based on product_id and used condition 
+// Or get Used items based on expiration date between the start date / end date
 router.get('/', auth, async (req, res) => {
   try {
     let errorParams = [];
@@ -26,7 +27,19 @@ router.get('/', auth, async (req, res) => {
           errorParams.push('productId');
         }
       }
-    }
+      // start date and end date for report
+      if (req.query.startDate) {
+        if (!verify.validString(req.query.startDate) || !verify.validIsoDate(req.query.startDate)) {
+          errorParams.push('startDate');
+        }
+      }
+
+      if (req.query.endDate) {
+        if (!verify.validString(req.query.endDate) || !verify.validIsoDate(req.query.endDate)) {
+          errorParams.push('endDate');
+        }
+      }
+    }   
     if (errorParams.length > 0) {
       res.status(422).json({
         status: 'error',
@@ -36,7 +49,11 @@ router.get('/', auth, async (req, res) => {
       return;
     }
     const userId = req.user.userId;
-    const allItems = await itemsData.getItems(req.query.productId, req.query.used, userId);
+    let allItems;
+    if (req.query.startDate || req.query.endDate)
+    {allItems = await itemsData.getReport(userId, req.query.startDate, req.query.endDate);}
+    else
+    {allItems = await itemsData.getItems(req.query.productId, req.query.used, userId);}
     res.status(200).json({
       items: allItems.allItems,
       status: 'success',
