@@ -4,7 +4,7 @@ const models = require('../models/index');
  * This method is used to get all categories from Category table
  */
 const getCategory = async () => {
-  const allCategory = await models.Category.findAll();
+  const allCategory = await models.category.findAll();
   if (allCategory == null || allCategory.length === 0) {
     return { categoryFound: false };
   } else {
@@ -16,7 +16,7 @@ const getCategory = async () => {
  * This method is used to find category by category_id from Category table
  */
 const getCategoryById = async (id) => {
-  const categoryById = await models.Category.findOne({ where: { id: id } });
+  const categoryById = await models.category.findOne({ where: { id: id } });
   if (categoryById == null) {
     return { categoryFound: false };
   } else {
@@ -29,7 +29,7 @@ const addCategory = async (categoryName) => {
   if (categoryName === '') {
     categoryName = 'other';
   }
-  const newCategory = await models.Category.findOrCreate({
+  const newCategory = await models.category.findOrCreate({
     where: { name: categoryName },
   });
   return newCategory;

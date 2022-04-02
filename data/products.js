@@ -291,7 +291,7 @@ const addCustomProduct = async (
  */
 const addToItem = async (expirationDate, quantity, cost, productId) => {
   let currentDate = new Date().toISOString();
-  const addedItem = await models.Item.create({
+  const addedItem = await models.item.create({
     product_id: productId,
     expiration_date: expirationDate,
     created_at: currentDate,

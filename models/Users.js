@@ -2,7 +2,7 @@ const Sequelize = require('sequelize-cockroachdb');
 
 module.exports = (sequelize) => {
   const User = sequelize.define(
-    'users',
+    'user',
     {
       id: {
         type: Sequelize.UUID,
@@ -27,6 +27,7 @@ module.exports = (sequelize) => {
     {
       timestamps: false,
       paranoid: false,
+      freezeTableName: true,
     }
   );
 

@@ -13,7 +13,7 @@ const getItems = async (productId = '', used = '', userId) => {
   if (used !== '') {
     where.is_used = used;
   }
-  allItems = await models.Item.findAll({
+  allItems = await models.item.findAll({
     include: [
       {
         model: models.user_product,
@@ -41,7 +41,7 @@ const getItemById = async (id) => {
   if (!id) {
     throw new Error('Invalid or missing requirements');
   }
-  const itemById = await models.Item.findOne({
+  const itemById = await models.item.findOne({
     where: {
       id: id,
     },
@@ -57,7 +57,7 @@ const getItemById = async (id) => {
  * This method is used to update an item in Item table
  */
 const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cost, isUsed) => {
-  const updatedItem = await models.Item.update(
+  const updatedItem = await models.item.update(
     {
       expiration_date: expirationDate,
       quantity: quantity,
@@ -81,7 +81,7 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
  * This method is used to delete an item in Item table
  */
 const deleteItem = async (itemId) => {
-  const deletedItem = await models.Item.destroy({
+  const deletedItem = await models.item.destroy({
     where: {
       id: itemId,
     },

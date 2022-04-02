@@ -3,7 +3,7 @@ const Sequelize = require('sequelize-cockroachdb');
 
 module.exports = (sequelize) => {
   const verificationCodes = sequelize.define(
-    'verification_codes',
+    'verification_code',
     {
       id: {
         type: Sequelize.UUID,
@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
         type: Sequelize.UUID,
         allowNull: false,
         defaultValue: Sequelize.UUIDV4,
-        references: 'users', // table name
+        references: 'user', // table name
         referencesKey: 'id', // the PK column name
       },
       code: {
@@ -26,6 +26,7 @@ module.exports = (sequelize) => {
     {
       timestamps: false,
       paranoid: false,
+      freezeTableName: true,
     }
   );
   return verificationCodes;

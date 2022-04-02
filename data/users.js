@@ -5,7 +5,7 @@ const hbs = require('nodemailer-handlebars');
 
 // Insert a record
 async function insertUser(name, email, password, isActivated) {
-  await models.users
+  await models.user
     .create({
       name,
       email: email.toLowerCase(),
@@ -20,7 +20,7 @@ async function insertUser(name, email, password, isActivated) {
 // check if email exists - sign up
 // true --> no record , false --> record exists
 async function checkEmail(email) {
-  const emails = await models.users
+  const emails = await models.user
     .findAll({
       where: {
         email: email.toLowerCase(),
@@ -36,7 +36,7 @@ async function checkEmail(email) {
 // return ID from Email
 async function getID(email) {
   email = email.toString().trim().toLowerCase();
-  const getUser = await models.users
+  const getUser = await models.user
     .findOne({
       where: { email: email },
     })
@@ -60,7 +60,7 @@ const checkUser = async (email, password) => {
   if (!email || !password) {
     throw new Error('Invalid or missing requirements');
   }
-  const user = await models.users.findOne({
+  const user = await models.user.findOne({
     where: { email: email.trim().toLowerCase() },
   });
   if (user === null) {
@@ -85,7 +85,7 @@ async function tempPass(email) {
   if (!email) {
     throw new Error('Invalid or missing requirements');
   }
-  const userData = await models.users.findOne({
+  const userData = await models.user.findOne({
     where: { email: email.toLowerCase() },
   });
   if (userData === null) {
@@ -94,7 +94,7 @@ async function tempPass(email) {
     var pass = getRandomString(8);
     const hashedpassword = await bcrypt.hash(pass, 10);
 
-    await models.users.update({ password: hashedpassword }, { where: { id: userData.id } });
+    await models.user.update({ password: hashedpassword }, { where: { id: userData.id } });
   }
   return pass;
 }
@@ -112,7 +112,7 @@ function getRandomString(length) {
 // return user from Email
 async function getUser(email) {
   email = email.trim().toLowerCase();
-  const getUser = await models.users
+  const getUser = await models.user
     .findOne({
       where: { email: email },
     })
@@ -130,7 +130,7 @@ async function updateUser(userId, name, password) {
   }
   const hashedpassword = await bcrypt.hash(password, 10);
 
-  await models.users.update({ name: name, password: hashedpassword }, { where: { id: userId } });
+  await models.user.update({ name: name, password: hashedpassword }, { where: { id: userId } });
 }
 
 // Start: Code added by Jose.
@@ -186,7 +186,7 @@ function emailSetup(title, templateName, userName, email, code) {
 }
 
 const getUserById = async (userId) => {
-  const user = await models.users
+  const user = await models.user
     .findOne({
       where: {
         id: userId,
