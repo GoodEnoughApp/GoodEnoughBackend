@@ -2,7 +2,7 @@ const Sequelize = require('sequelize-cockroachdb');
 
 module.exports = (sequelize) => {
   const Category = sequelize.define(
-    'Category',
+    'category',
     {
       id: {
         type: Sequelize.UUID,

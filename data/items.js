@@ -15,7 +15,7 @@ const getItems = async (productId = '', used = '', userId) => {
   if (used !== '') {
     where.is_used = used;
   }
-  allItems = await models.Item.findAll({
+  allItems = await models.item.findAll({
     include: [
       {
         model: models.user_product,
@@ -43,7 +43,7 @@ const getItemById = async (id) => {
   if (!id) {
     throw new Error('Invalid or missing requirements');
   }
-  const itemById = await models.Item.findOne({
+  const itemById = await models.item.findOne({
     where: {
       id: id,
     },
@@ -59,7 +59,7 @@ const getItemById = async (id) => {
  * This method is used to update an item in Item table
  */
 const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cost, isUsed) => {
-  const updatedItem = await models.Item.update(
+  const updatedItem = await models.item.update(
     {
       expiration_date: expirationDate,
       quantity: quantity,
@@ -83,7 +83,7 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
  * This method is used to delete an item in Item table
  */
 const deleteItem = async (itemId) => {
-  const deletedItem = await models.Item.destroy({
+  const deletedItem = await models.item.destroy({
     where: {
       id: itemId,
     },
@@ -98,70 +98,68 @@ const deleteItem = async (itemId) => {
 /**
  * This method is used to show item report
  */
- const getReport = async (userId, startDate='', endDate='') => {
+const getReport = async (userId, startDate = '', endDate = '') => {
   let allItems;
   var sDate;
   var eDate;
-  if(startDate !== '' && endDate!== '')
-  {
+  if (startDate !== '' && endDate !== '') {
     sDate = new Date(startDate);
     eDate = new Date(endDate);
-    sDate =  moment(sDate).format('YYYY-MM-DD');
-    eDate =  moment(eDate).format('YYYY-MM-DD');
-    allItems = await models.Item.findAll({
+    sDate = moment(sDate).format('YYYY-MM-DD');
+    eDate = moment(eDate).format('YYYY-MM-DD');
+    allItems = await models.item.findAll({
       include: [
         {
           model: models.user_product,
           where: {
-           user_id: userId,
+            user_id: userId,
           },
         },
       ],
-      where: { is_used: false,
-      expiration_date: {
-      [Op.between]: [sDate, eDate]
-            }
-            }
+      where: {
+        is_used: false,
+        expiration_date: {
+          [Op.between]: [sDate, eDate],
+        },
+      },
     });
-  }
-  else if(startDate !== '')
-  {
+  } else if (startDate !== '') {
     sDate = new Date(startDate);
-    sDate =  moment(sDate).format('YYYY-MM-DD');
-    allItems = await models.Item.findAll({
+    sDate = moment(sDate).format('YYYY-MM-DD');
+    allItems = await models.item.findAll({
       include: [
         {
           model: models.user_product,
           where: {
-           user_id: userId,
+            user_id: userId,
           },
         },
       ],
-      where: { is_used: false,
-      expiration_date: {
-        [Op.gte]: sDate
-             }
-            }
+      where: {
+        is_used: false,
+        expiration_date: {
+          [Op.gte]: sDate,
+        },
+      },
     });
-  }
-  else
-  {
+  } else {
     eDate = new Date(endDate);
-    eDate =  moment(eDate).format('YYYY-MM-DD');
-    allItems = await models.Item.findAll({
+    eDate = moment(eDate).format('YYYY-MM-DD');
+    allItems = await models.item.findAll({
       include: [
         {
           model: models.user_product,
           where: {
-           user_id: userId,
+            user_id: userId,
           },
         },
       ],
-      where: { is_used: false,
-      expiration_date: {
-        [Op.lte]: eDate
-             }
-            }
+      where: {
+        is_used: false,
+        expiration_date: {
+          [Op.lte]: eDate,
+        },
+      },
     });
   }
   if (allItems === null) {

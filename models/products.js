@@ -32,7 +32,7 @@ module.exports = (sequelize) => {
   );
 
   Product.associate = (models) => {
-    Product.belongsTo(models.Category, { foreignKey: 'category_id' });
+    Product.belongsTo(models.category, { foreignKey: 'category_id' });
     Product.hasOne(models.user_product, { foreignKey: 'barcode' });
   };
 
