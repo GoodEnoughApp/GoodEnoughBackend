@@ -29,10 +29,21 @@ const getItems = async (productId = '', used = '', userId) => {
   if (allItems === null) {
     return { itemsFound: false };
   } else {
+    let allItemsResponse = [];
     for (let index = 0; index < allItems.length; index++) {
-      delete allItems[index].dataValues['user_product'];
+      let item = {
+        id: allItems[index].dataValues.id,
+        productId: allItems[index].dataValues.product_id,
+        expirationDate: allItems[index].dataValues.expiration_date,
+        createdAt: allItems[index].dataValues.created_at,
+        quantity: allItems[index].dataValues.quantity,
+        initialQuantity: allItems[index].dataValues.initial_quantity,
+        cost: allItems[index].dataValues.cost,
+        isUsed: allItems[index].dataValues.is_used,
+      };
+      allItemsResponse.push(item);
     }
-    return { itemsFound: true, allItems: allItems };
+    return { itemsFound: true, allItems: allItemsResponse };
   }
 };
 
@@ -51,7 +62,17 @@ const getItemById = async (id) => {
   if (itemById == null) {
     return { itemsFound: false };
   } else {
-    return { itemsFound: true, itemById: itemById.dataValues };
+    let item = {
+      id: itemById.dataValues.id,
+      productId: itemById.dataValues.product_id,
+      expirationDate: itemById.dataValues.expiration_date,
+      createdAt: itemById.dataValues.created_at,
+      quantity: itemById.dataValues.quantity,
+      initialQuantity: itemById.dataValues.initial_quantity,
+      cost: itemById.dataValues.cost,
+      isUsed: itemById.dataValues.is_used,
+    };
+    return { itemsFound: true, itemById: item };
   }
 };
 
