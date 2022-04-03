@@ -299,4 +299,13 @@ router.get('/resend', async (req, res) => {
   }
 });
 
+// check status
+router.get('/', async (req, res) => {
+  return res.status(200).json({
+    status: 'success',
+    message: 'Success',
+    code: 'Success',
+  });
+});
+
 module.exports = router;
