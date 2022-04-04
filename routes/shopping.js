@@ -172,7 +172,7 @@ router.get('/:itemId', auth, async (req, res) => {
     const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
     if (itemById.itemsFound) {
       const userId = req.user.userId;
-      const productById = await productsData.getUserProductById(itemById.itemById.product_id);
+      const productById = await productsData.getUserProductById(itemById.itemById.productId);
       if (productById.productsFound) {
         if (userId !== productById.productById.user_id) {
           res.status(403).json({

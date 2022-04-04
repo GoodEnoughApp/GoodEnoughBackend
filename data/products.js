@@ -89,6 +89,7 @@ const addProduct = async (barcode, userId) => {
         id: categoryById.categoryById.id,
         name: categoryById.categoryById.name,
       };
+      userProductCreated.type = 'barcode';
       delete userProductCreated['category_id'];
       delete userProductCreated['user_id'];
       return {
@@ -200,6 +201,7 @@ const getUserProducts = async (categoryId = '', userId) => {
         id: categoryById.categoryById.id,
         name: categoryById.categoryById.name,
       };
+      allUserProducts[index].dataValues.type = 'barcode';
       delete allUserProducts[index].dataValues['category_id'];
       delete allUserProducts[index].dataValues['user_id'];
     }
@@ -228,6 +230,7 @@ const getUserProductById = async (id) => {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
+    productById.dataValues.type = 'barcode';
     delete productById.dataValues['category_id'];
     return { productsFound: true, productById: productById.dataValues };
   }
