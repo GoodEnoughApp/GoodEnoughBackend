@@ -186,10 +186,21 @@ const getReport = async (userId, startDate = '', endDate = '') => {
   if (allItems === null) {
     return { itemsFound: false };
   } else {
+    let allItemsResponse = [];
     for (let index = 0; index < allItems.length; index++) {
-      delete allItems[index].dataValues['user_product'];
+      let item = {
+        id: allItems[index].dataValues.id,
+        productId: allItems[index].dataValues.product_id,
+        expirationDate: allItems[index].dataValues.expiration_date,
+        createdAt: allItems[index].dataValues.created_at,
+        quantity: allItems[index].dataValues.quantity,
+        initialQuantity: allItems[index].dataValues.initial_quantity,
+        cost: allItems[index].dataValues.cost,
+        isUsed: allItems[index].dataValues.is_used,
+      };
+      allItemsResponse.push(item);
     }
-    return { itemsFound: true, allItems: allItems };
+    return { itemsFound: true, allItems: allItemsResponse };
   }
 };
 
