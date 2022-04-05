@@ -3,6 +3,7 @@ const auth = require('../middlewares/jwtAuth');
 const verify = require('../middlewares/validation');
 const itemsData = require('../data/items');
 const productsData = require('../data/products');
+
 const router = express.Router();
 
 // To get item from item table based on product_id and used condition

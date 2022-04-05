@@ -28,14 +28,7 @@ function checkIfValidUUID(str) {
 }
 
 function checkIsProperNumber(val) {
-  if (typeof val !== 'number') {
-    return false;
-  }
-
-  if (isNaN(val)) {
-    return false;
-  }
-  return true;
+  return typeof val === 'number';
 }
 
 function validIsoDate(date) {
