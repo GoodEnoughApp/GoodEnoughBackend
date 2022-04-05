@@ -3,12 +3,34 @@ require('pg').defaults.parseInt8 = true;
 const moment = require('moment');
 const { Op } = require('sequelize');
 
+function mapItem(item) {
+  const { dataValues } = item;
+  // eslint-disable-next-line camelcase
+  const { id, product_id, expiration_date, created_at, quantity, initial_quantity, cost, is_used } =
+    dataValues;
+  return {
+    id,
+    quantity,
+    cost,
+    // eslint-disable-next-line camelcase
+    isUsed: is_used,
+    // eslint-disable-next-line camelcase
+    initialQuantity: initial_quantity,
+    // eslint-disable-next-line camelcase
+    createdAt: created_at,
+    // eslint-disable-next-line camelcase
+    expirationDate: expiration_date,
+    // eslint-disable-next-line camelcase
+    productId: product_id,
+  };
+}
+
 /**
  * This method is used to show items from item table based on product_id and used condition
  */
 const getItems = async (productId = '', used = '', userId) => {
   let allItems;
-  let where = {};
+  const where = {};
   if (productId !== '') {
     where.product_id = productId;
   }
@@ -24,27 +46,13 @@ const getItems = async (productId = '', used = '', userId) => {
         },
       },
     ],
-    where: where,
+    where,
   });
   if (allItems === null) {
     return { itemsFound: false };
-  } else {
-    let allItemsResponse = [];
-    for (let index = 0; index < allItems.length; index++) {
-      let item = {
-        id: allItems[index].dataValues.id,
-        productId: allItems[index].dataValues.product_id,
-        expirationDate: allItems[index].dataValues.expiration_date,
-        createdAt: allItems[index].dataValues.created_at,
-        quantity: allItems[index].dataValues.quantity,
-        initialQuantity: allItems[index].dataValues.initial_quantity,
-        cost: allItems[index].dataValues.cost,
-        isUsed: allItems[index].dataValues.is_used,
-      };
-      allItemsResponse.push(item);
-    }
-    return { itemsFound: true, allItems: allItemsResponse };
   }
+  allItems = allItems.map(mapItem);
+  return { itemsFound: true, allItems };
 };
 
 /**
@@ -56,24 +64,13 @@ const getItemById = async (id) => {
   }
   const itemById = await models.item.findOne({
     where: {
-      id: id,
+      id,
     },
   });
   if (itemById == null) {
     return { itemsFound: false };
-  } else {
-    let item = {
-      id: itemById.dataValues.id,
-      productId: itemById.dataValues.product_id,
-      expirationDate: itemById.dataValues.expiration_date,
-      createdAt: itemById.dataValues.created_at,
-      quantity: itemById.dataValues.quantity,
-      initialQuantity: itemById.dataValues.initial_quantity,
-      cost: itemById.dataValues.cost,
-      isUsed: itemById.dataValues.is_used,
-    };
-    return { itemsFound: true, itemById: item };
   }
+  return { itemsFound: true, itemById: mapItem(itemById) };
 };
 
 /**
@@ -83,9 +80,9 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
   const updatedItem = await models.item.update(
     {
       expiration_date: expirationDate,
-      quantity: quantity,
+      quantity,
       initial_quantity: initialQuantity,
-      cost: cost,
+      cost,
       is_used: isUsed,
     },
     {
@@ -96,6 +93,7 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
   );
   if (updatedItem[0] === 1) {
     const newUpdatedItem = await getItemById(itemId);
+    console.log(newUpdatedItem);
     return { itemUpdated: true, item: newUpdatedItem.itemById };
   }
 };

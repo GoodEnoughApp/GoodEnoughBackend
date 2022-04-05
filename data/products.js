@@ -163,7 +163,7 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
       where: {
         user_id: userId,
         category_id: categoryId,
-        barcode: barcode,
+        barcode,
         barcode_type: 'UPC',
         name: upcProduct.title,
         alias: upcProduct.alias,
@@ -182,14 +182,13 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
  * This method is used to find product(s) in user_product table using categoryId as a param
  */
 const getUserProducts = async (categoryId = '', userId) => {
-  let allUserProducts;
-  let where = {};
+  const where = {};
   if (categoryId.trim() !== '') {
     where.category_id = categoryId;
   }
   where.user_id = userId;
-  allUserProducts = await models.user_product.findAll({
-    where: where,
+  const allUserProducts = await models.user_product.findAll({
+    where,
   });
   if (allUserProducts === null) {
     return { productsFound: false };
@@ -218,7 +217,7 @@ const getUserProductById = async (id) => {
   }
   const productById = await models.user_product.findOne({
     where: {
-      id: id,
+      id,
     },
   });
   if (productById === null) {
@@ -230,8 +229,10 @@ const getUserProductById = async (id) => {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
+    productById.dataValues['userId'] = productById.dataValues['user_id'];
     productById.dataValues.type = 'barcode';
     delete productById.dataValues['category_id'];
+    delete productById.dataValues['user_id'];
     return { productsFound: true, productById: productById.dataValues };
   }
 };
@@ -263,17 +264,17 @@ const addCustomProduct = async (
       where: {
         user_id: userId,
         category_id: categoryId,
-        barcode: barcode,
+        barcode,
         barcode_type: 'EAN',
-        name: name,
-        alias: alias,
-        description: description,
-        brand: brand,
-        manufacturer: manufacturer,
+        name,
+        alias,
+        description,
+        brand,
+        manufacturer,
       },
     });
-    let tempCategoryId = addedUserProduct[0].dataValues.category_id;
-    let categoryById = await categoryData.getCategoryById(tempCategoryId);
+    const tempCategoryId = addedUserProduct[0].dataValues.category_id;
+    const categoryById = await categoryData.getCategoryById(tempCategoryId);
     addedUserProduct[0].dataValues.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
