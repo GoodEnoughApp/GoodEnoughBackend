@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize-cockroachdb');
+
 module.exports = (sequelize) => {
   const userProduct = sequelize.define(
     'user_product',
@@ -60,6 +61,4 @@ module.exports = (sequelize) => {
   return userProduct;
 };
 
-const syncUser = async (model) => {
-  return await model.sync();
-};
+const syncUser = async (model) => await model.sync();

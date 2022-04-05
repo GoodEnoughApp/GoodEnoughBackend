@@ -248,6 +248,8 @@ router.delete('/:itemId', auth, async (req, res) => {
     const productById = await productsData.getUserProductById(itemById.itemById.productId);
 
     if (productById.productsFound) {
+      console.log(`User id: ${userId}`);
+      console.log(`Product user id: `, productById);
       if (userId !== productById.productById.userId) {
         res.status(403).json({
           status: 'error',

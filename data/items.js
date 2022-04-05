@@ -109,9 +109,9 @@ const deleteItem = async (itemId) => {
   });
   if (deletedItem === 1) {
     return { delete: true };
-  } else {
+  } 
     return { delete: false };
-  }
+  
 };
 
 /**
@@ -119,8 +119,8 @@ const deleteItem = async (itemId) => {
  */
 const getReport = async (userId, startDate = '', endDate = '') => {
   let allItems;
-  var sDate;
-  var eDate;
+  let sDate;
+  let eDate;
   if (startDate !== '' && endDate !== '') {
     sDate = new Date(startDate);
     eDate = new Date(endDate);
@@ -183,10 +183,10 @@ const getReport = async (userId, startDate = '', endDate = '') => {
   }
   if (allItems === null) {
     return { itemsFound: false };
-  } else {
-    let allItemsResponse = [];
+  } 
+    const allItemsResponse = [];
     for (let index = 0; index < allItems.length; index++) {
-      let item = {
+      const item = {
         id: allItems[index].dataValues.id,
         productId: allItems[index].dataValues.product_id,
         expirationDate: allItems[index].dataValues.expiration_date,
@@ -199,7 +199,7 @@ const getReport = async (userId, startDate = '', endDate = '') => {
       allItemsResponse.push(item);
     }
     return { itemsFound: true, allItems: allItemsResponse };
-  }
+  
 };
 
 module.exports = {

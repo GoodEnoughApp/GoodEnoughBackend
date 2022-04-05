@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
-const models = require('../models/index');
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-handlebars');
+const models = require('../models/index');
 
 // Insert a record
 async function insertUser(name, email, password, isActivated) {
@@ -38,7 +38,7 @@ async function getID(email) {
   email = email.toString().trim().toLowerCase();
   const getUser = await models.user
     .findOne({
-      where: { email: email },
+      where: { email },
     })
     .catch((err) => {
       throw `error: ${err.message}`;
@@ -101,9 +101,9 @@ async function tempPass(email) {
 
 // Get random characters
 function getRandomString(length) {
-  var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var result = '';
-  for (var i = 0; i < length; i++) {
+  const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
     result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
   }
   return result;
@@ -114,7 +114,7 @@ async function getUser(email) {
   email = email.trim().toLowerCase();
   const getUser = await models.user
     .findOne({
-      where: { email: email },
+      where: { email },
     })
     .catch((err) => {
       throw `error: ${err.message}`;
@@ -130,7 +130,7 @@ async function updateUser(userId, name, password) {
   }
   const hashedpassword = await bcrypt.hash(password, 10);
 
-  await models.user.update({ name: name, password: hashedpassword }, { where: { id: userId } });
+  await models.user.update({ name, password: hashedpassword }, { where: { id: userId } });
 }
 
 // Start: Code added by Jose.
@@ -145,15 +145,15 @@ function randomNumber(min, max) {
 }
 
 function padLeadingZeros(num, size) {
-  let s = num + '';
-  while (s.length < size) s = '0' + s;
+  let s = `${num  }`;
+  while (s.length < size) s = `0${  s}`;
   return s;
 }
 // end
 
 // Setup email
 function emailSetup(title, templateName, userName, email, code) {
-  let transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.Email,
@@ -171,18 +171,18 @@ function emailSetup(title, templateName, userName, email, code) {
       viewPath: './views/',
     })
   );
-  let mailOptions = {
+  const mailOptions = {
     from: process.env.Email,
     to: email,
     subject: title,
     template: templateName,
     context: {
-      userName: userName,
-      code: code,
+      userName,
+      code,
     },
   };
   transporter.sendMail(mailOptions);
-  return;
+  
 }
 
 const getUserById = async (userId) => {
@@ -210,5 +210,5 @@ module.exports = {
   getActivationCode,
   emailSetup,
   getUserById,
-  //getRandomString,
+  // getRandomString,
 };

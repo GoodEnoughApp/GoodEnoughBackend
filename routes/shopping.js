@@ -43,7 +43,7 @@ router.post('/', auth, async (req, res) => {
       return;
     }
     const { userId } = req.user;
-    if (userId !== getProductDataById.productById.user_id) {
+    if (userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
@@ -139,7 +139,7 @@ router.put('/:itemId', auth, async (req, res) => {
 
     const productById = await productsData.getUserProductById(item.itemById.productId);
     if (productById.productsFound) {
-      if (userId !== productById.productById.user_id) {
+      if (userId !== productById.productById.userId) {
         res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',
@@ -181,7 +181,7 @@ router.get('/:itemId', auth, async (req, res) => {
       const { userId } = req.user;
       const productById = await productsData.getUserProductById(itemById.itemById.productId);
       if (productById.productsFound) {
-        if (userId !== productById.productById.user_id) {
+        if (userId !== productById.productById.userId) {
           res.status(403).json({
             status: 'error',
             message: 'Not authorized to perform that action',
@@ -237,7 +237,7 @@ router.delete('/:itemId', auth, async (req, res) => {
     const { userId } = req.user;
     const productById = await productsData.getUserProductById(itemById.itemById.productId);
     if (productById.productsFound) {
-      if (userId !== productById.productById.user_id) {
+      if (userId !== productById.productById.userId) {
         res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',
