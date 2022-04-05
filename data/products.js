@@ -12,15 +12,15 @@ const baseURL = 'https://api.upcdatabase.org/product';
 const findUserProductUsingBarcode = async (barcode, userId) => {
   const userProduct = await models.user_product.findOne({
     where: {
-      barcode: barcode,
+      barcode,
       user_id: userId,
     },
   });
   if (userProduct !== null) {
     return { found: true, userProduct: userProduct.dataValues };
-  } else {
-    return { found: false };
   }
+
+  return { found: false };
 };
 
 /**
@@ -29,27 +29,27 @@ const findUserProductUsingBarcode = async (barcode, userId) => {
 const findProductUsingBarcode = async (barcode) => {
   const product = await models.product.findOne({
     where: {
-      barcode: barcode,
+      barcode,
     },
   });
   if (product !== null) {
     return { found: true, product: product.dataValues };
-  } else {
-    return { found: false };
   }
+
+  return { found: false };
 };
 
 /**
  * This method is used to find product in UPC database using barcode as a param
  */
 const findUpcProductUsingBarcode = async (barcode) => {
-  let url = `${baseURL}/${barcode}?apikey=${process.env.UPC_API_KEY}`;
+  const url = `${baseURL}/${barcode}?apikey=${process.env.UPC_API_KEY}`;
   const upcProduct = await axios.get(url);
   if (upcProduct.data.success === true) {
     return { found: true, upcProduct: upcProduct.data };
-  } else {
-    return { found: false };
   }
+
+  return { found: false };
 };
 
 /**
@@ -141,7 +141,7 @@ const createProductUsingUPC = async (barcode, upcProduct, userId, categoryId) =>
   try {
     const addedProduct = await models.product.findOrCreate({
       where: {
-        barcode: barcode,
+        barcode,
         barcode_type: 'UPC',
         name: upcProduct.title,
         category_id: categoryId,

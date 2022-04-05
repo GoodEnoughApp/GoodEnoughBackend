@@ -10,7 +10,7 @@ const router = express.Router();
 // Or get Used items based on expiration date between the start date / end date
 router.get('/', auth, async (req, res) => {
   try {
-    let errorParams = [];
+    const errorParams = [];
     if (req.query) {
       if (req.query.used) {
         if (verify.validString(req.query.used) && req.query.used.toLowerCase() === 'true') {
@@ -49,7 +49,7 @@ router.get('/', auth, async (req, res) => {
       });
       return;
     }
-    const userId = req.user.userId;
+    const { userId } = req.user;
     let allItems;
     if (req.query.startDate || req.query.endDate) {
       allItems = await itemsData.getReport(userId, req.query.startDate, req.query.endDate);
