@@ -217,7 +217,7 @@ router.post('/:productId', auth, async (req, res) => {
       return;
     }
     const decoded = req.user;
-    if (decoded.userId !== getProductDataById.productById.user_id) {
+    if (decoded.userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
@@ -300,7 +300,7 @@ router.put('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    if (!updateProduct.categoryFound) {
+    if (updateProduct.categoryFound === false) {
       res.status(422).json({
         status: 'error',
         message: 'Wrong Category Id',
@@ -335,7 +335,7 @@ router.get('/:productId', auth, async (req, res) => {
     const { userId } = req.user;
     const productById = await productsData.getUserProductById(req.params.productId);
     if (productById.productsFound) {
-      if (productById.productById.user_id !== userId) {
+      if (productById.productById.userId !== userId) {
         res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',
@@ -343,7 +343,7 @@ router.get('/:productId', auth, async (req, res) => {
         });
         return;
       }
-      delete productById.productById.user_id;
+      delete productById.productById.userId;
       res.status(200).json({
         product: productById.productById,
         status: 'success',
@@ -386,7 +386,7 @@ router.delete('/:productId', auth, async (req, res) => {
       return;
     }
     const decoded = req.user;
-    if (decoded.userId !== getProductDataById.productById.user_id) {
+    if (decoded.userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',

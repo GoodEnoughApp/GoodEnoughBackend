@@ -75,63 +75,51 @@ const addProduct = async (barcode, userId) => {
       product: userProduct.userProduct,
       found: true,
     };
-  } 
-    const product = await findProductUsingBarcode(barcode);
-    if (product.found) {
-      const userProductCreated = await createUserProductFromProduct(
-        userId,
-        barcode,
-        product.product
-      );
-      const tempCategoryId = userProductCreated.category_id;
-      const categoryById = await categoryData.getCategoryById(tempCategoryId);
-      userProductCreated.category = {
-        id: categoryById.categoryById.id,
-        name: categoryById.categoryById.name,
-      };
-      userProductCreated.type = 'barcode';
-      delete userProductCreated.category_id;
-      delete userProductCreated.user_id;
-      return {
-        type: 'PRODUCT',
-        product: userProductCreated,
-        found: true,
-      };
-    } 
-      const upcProduct = await findUpcProductUsingBarcode(barcode);
-      if (upcProduct.found) {
-        const category = await categoryData.addCategory(
-          upcProduct.upcProduct.category.toLowerCase()
-        );
-        if (
-          upcProduct.upcProduct.title !== undefined &&
-          upcProduct.upcProduct.title.trim() === ''
-        ) {
-          if (
-            upcProduct.upcProduct.description !== undefined &&
-            upcProduct.upcProduct.description.trim() === ''
-          ) {
-            upcProduct.upcProduct.title = 'GoodEnough Item';
-          } else {
-            upcProduct.upcProduct.title = upcProduct.upcProduct.description.trim();
-          }
-        }
-        const createdProduct = await createProductUsingUPC(
-          barcode,
-          upcProduct.upcProduct,
-          userId,
-          category[0].dataValues.id
-        );
-        return {
-          type: 'UPC_PRODUCT',
-          product: createdProduct,
-          found: true,
-        };
-      } 
-        return { found: false };
-      
-    
-  
+  }
+  const product = await findProductUsingBarcode(barcode);
+  if (product.found) {
+    const userProductCreated = await createUserProductFromProduct(userId, barcode, product.product);
+    const tempCategoryId = userProductCreated.category_id;
+    const categoryById = await categoryData.getCategoryById(tempCategoryId);
+    userProductCreated.category = {
+      id: categoryById.categoryById.id,
+      name: categoryById.categoryById.name,
+    };
+    userProductCreated.type = 'barcode';
+    delete userProductCreated.category_id;
+    delete userProductCreated.user_id;
+    return {
+      type: 'PRODUCT',
+      product: userProductCreated,
+      found: true,
+    };
+  }
+  const upcProduct = await findUpcProductUsingBarcode(barcode);
+  if (upcProduct.found) {
+    const category = await categoryData.addCategory(upcProduct.upcProduct.category.toLowerCase());
+    if (upcProduct.upcProduct.title !== undefined && upcProduct.upcProduct.title.trim() === '') {
+      if (
+        upcProduct.upcProduct.description !== undefined &&
+        upcProduct.upcProduct.description.trim() === ''
+      ) {
+        upcProduct.upcProduct.title = 'GoodEnough Item';
+      } else {
+        upcProduct.upcProduct.title = upcProduct.upcProduct.description.trim();
+      }
+    }
+    const createdProduct = await createProductUsingUPC(
+      barcode,
+      upcProduct.upcProduct,
+      userId,
+      category[0].dataValues.id
+    );
+    return {
+      type: 'UPC_PRODUCT',
+      product: createdProduct,
+      found: true,
+    };
+  }
+  return { found: false };
 };
 
 /**
@@ -192,20 +180,19 @@ const getUserProducts = async (categoryId = '', userId) => {
   });
   if (allUserProducts === null) {
     return { productsFound: false };
-  } 
-    for (let index = 0; index < allUserProducts.length; index++) {
-      const tempCategoryId = allUserProducts[index].category_id;
-      const categoryById = await categoryData.getCategoryById(tempCategoryId);
-      allUserProducts[index].dataValues.category = {
-        id: categoryById.categoryById.id,
-        name: categoryById.categoryById.name,
-      };
-      allUserProducts[index].dataValues.type = 'barcode';
-      delete allUserProducts[index].dataValues.category_id;
-      delete allUserProducts[index].dataValues.user_id;
-    }
-    return { productsFound: true, allUserProducts };
-  
+  }
+  for (let index = 0; index < allUserProducts.length; index++) {
+    const tempCategoryId = allUserProducts[index].category_id;
+    const categoryById = await categoryData.getCategoryById(tempCategoryId);
+    allUserProducts[index].dataValues.category = {
+      id: categoryById.categoryById.id,
+      name: categoryById.categoryById.name,
+    };
+    allUserProducts[index].dataValues.type = 'barcode';
+    delete allUserProducts[index].dataValues.category_id;
+    delete allUserProducts[index].dataValues.user_id;
+  }
+  return { productsFound: true, allUserProducts };
 };
 
 /**
@@ -222,19 +209,18 @@ const getUserProductById = async (id) => {
   });
   if (productById === null) {
     return { productsFound: false };
-  } 
-    const tempCategoryId = productById.dataValues.category_id;
-    const categoryById = await categoryData.getCategoryById(tempCategoryId);
-    productById.dataValues.category = {
-      id: categoryById.categoryById.id,
-      name: categoryById.categoryById.name,
-    };
-    productById.dataValues.userId = productById.dataValues.user_id;
-    productById.dataValues.type = 'barcode';
-    delete productById.dataValues.category_id;
-    delete productById.dataValues.user_id;
-    return { productsFound: true, productById: productById.dataValues };
-  
+  }
+  const tempCategoryId = productById.dataValues.category_id;
+  const categoryById = await categoryData.getCategoryById(tempCategoryId);
+  productById.dataValues.category = {
+    id: categoryById.categoryById.id,
+    name: categoryById.categoryById.name,
+  };
+  productById.dataValues.userId = productById.dataValues.user_id;
+  productById.dataValues.type = 'barcode';
+  delete productById.dataValues.category_id;
+  delete productById.dataValues.user_id;
+  return { productsFound: true, productById: productById.dataValues };
 };
 
 /**
@@ -306,9 +292,8 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
   });
   if (addedItem === null) {
     return { itemAdded: false };
-  } 
-    return { itemAdded: true, addedItem: addedItem.dataValues };
-  
+  }
+  return { itemAdded: true, addedItem: addedItem.dataValues };
 };
 
 const deleteProduct = async (productId) => {
@@ -319,9 +304,8 @@ const deleteProduct = async (productId) => {
   });
   if (deletedProduct === 1) {
     return { delete: true };
-  } 
-    return { delete: false };
-  
+  }
+  return { delete: false };
 };
 
 const createUserProductFromProduct = async (userId, barcode, product) => {
@@ -364,9 +348,7 @@ const updateProduct = async (
   if (!categoryCheck.categoryFound) {
     return { categoryFound: false };
   }
-  if (product.found && product.userProduct.id !== productId) {
-    return { barcodeExists: true };
-  }
+
   const updatedProduct = await models.user_product.update(
     {
       barcode,
@@ -385,6 +367,7 @@ const updateProduct = async (
     }
   );
   const productById = await getUserProductById(productId);
+  delete productById.productById.userId;
   return { productUpdated: true, product: productById.productById };
 };
 
