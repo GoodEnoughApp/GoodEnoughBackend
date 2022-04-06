@@ -92,7 +92,6 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
       users = await userData.checkUser(email, password);
-      console.log(users);
       if (!users.verified) {
         res.status(409).json({
           status: 'error',
@@ -128,7 +127,6 @@ router.post('/login', async (req, res) => {
       });
     }
   } catch (e) {
-    console.error(e);
     res.status(500).json({
       status: 'error',
       message: e.message,

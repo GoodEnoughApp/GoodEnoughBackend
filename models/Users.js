@@ -35,8 +35,5 @@ module.exports = (sequelize) => {
     User.hasMany(models.user_product, { foreignKey: 'id', as: 'user_id' });
   };
 
-  syncUser(User);
   return User;
 };
-
-const syncUser = async (model) => await model.sync();

@@ -155,7 +155,6 @@ router.put('/:itemId', auth, async (req, res) => {
       throw new Error();
     }
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       status: 'error',
       message: error.message,

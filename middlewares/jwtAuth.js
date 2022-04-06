@@ -1,3 +1,4 @@
+/* eslint-disable */
 const jwt = require('jsonwebtoken');
 const userData = require('../data/users');
 require('dotenv').config();

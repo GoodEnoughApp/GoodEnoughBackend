@@ -35,8 +35,5 @@ module.exports = (sequelize) => {
     shopping.belongsTo(models.user_product, { foreignKey: 'product_id', targetKey: 'id' });
   };
 
-  syncUser(shopping);
   return shopping;
 };
-
-const syncUser = async (model) => await model.sync();

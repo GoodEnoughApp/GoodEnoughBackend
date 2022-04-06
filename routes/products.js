@@ -67,7 +67,7 @@ router.get('/', auth, async (req, res) => {
     }
     try {
       const { userId } = req.user;
-      const allUserProducts = await productsData.getUserProducts(req.query.categoryId, userId);
+      const allUserProducts = await productsData.getUserProducts(userId, req.query.categoryId);
       if (allUserProducts.productsFound) {
         res.status(200).json({
           products: allUserProducts.allUserProducts,
@@ -217,33 +217,32 @@ router.post('/:productId', auth, async (req, res) => {
       return;
     }
     const decoded = req.user;
-    if (decoded.userId !== getProductDataById.productById.user_id) {
+    if (decoded.userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
         code: 'ERROR_NOT_ALLOWED',
       });
       return;
-    } 
-      try {
-        const item = await productsData.addToItem(
-          expirationDate,
-          quantity,
-          cost,
-          getProductDataById.productById.id
-        );
-        if (item.itemAdded) {
-          res.status(201).json({ item: item.addedItem, status: 'success' });
-        }
-      } catch (error) {
-        res.status(409).json({
-          status: 'error',
-          message: error.message,
-          code: 'ERROR',
-        });
-        return;
+    }
+    try {
+      const item = await productsData.addToItem(
+        expirationDate,
+        quantity,
+        cost,
+        getProductDataById.productById.id
+      );
+      if (item.itemAdded) {
+        res.status(201).json({ item: item.addedItem, status: 'success' });
       }
-    
+    } catch (error) {
+      res.status(409).json({
+        status: 'error',
+        message: error.message,
+        code: 'ERROR',
+      });
+      return;
+    }
   } catch (error) {
     res.status(500).json({
       status: 'error',
@@ -281,7 +280,7 @@ router.put('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const {userId} = req.user;
+    const { userId } = req.user;
     const updateProduct = await productsData.updateProduct(
       req.params.productId,
       userId,
@@ -301,7 +300,7 @@ router.put('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    if (!updateProduct.categoryFound) {
+    if (updateProduct.categoryFound === false) {
       res.status(422).json({
         status: 'error',
         message: 'Wrong Category Id',
@@ -333,10 +332,10 @@ router.get('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const {userId} = req.user;
+    const { userId } = req.user;
     const productById = await productsData.getUserProductById(req.params.productId);
     if (productById.productsFound) {
-      if (productById.productById.user_id !== userId) {
+      if (productById.productById.userId !== userId) {
         res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',
@@ -344,20 +343,19 @@ router.get('/:productId', auth, async (req, res) => {
         });
         return;
       }
-      delete productById.productById.user_id;
+      delete productById.productById.userId;
       res.status(200).json({
         product: productById.productById,
         status: 'success',
       });
       return;
-    } 
-      res.status(404).json({
-        status: 'error',
-        message: 'Product not found',
-        code: 'ERROR_NOT_FOUND_PRODUCT',
-      });
-      return;
-    
+    }
+    res.status(404).json({
+      status: 'error',
+      message: 'Product not found',
+      code: 'ERROR_NOT_FOUND_PRODUCT',
+    });
+    return;
   } catch (error) {
     res.status(500).json({
       status: 'error',
@@ -388,7 +386,7 @@ router.delete('/:productId', auth, async (req, res) => {
       return;
     }
     const decoded = req.user;
-    if (decoded.userId !== getProductDataById.productById.user_id) {
+    if (decoded.userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',

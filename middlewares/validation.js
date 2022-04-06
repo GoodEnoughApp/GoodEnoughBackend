@@ -1,3 +1,4 @@
+/* eslint-disable */
 function validString(str) {
   if (!str || typeof str !== 'string' || !str.trim()) return false;
   return true;
@@ -28,7 +29,14 @@ function checkIfValidUUID(str) {
 }
 
 function checkIsProperNumber(val) {
-  return typeof val === 'number';
+  if (typeof val !== 'number') {
+    return false;
+  }
+
+  if (isNaN(val)) {
+    return false;
+  }
+  return true;
 }
 
 function validIsoDate(date) {
