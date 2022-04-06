@@ -36,10 +36,5 @@ module.exports = (sequelize) => {
     Product.hasOne(models.user_product, { foreignKey: 'barcode' });
   };
 
-  syncUser(Product);
   return Product;
-};
-
-const syncUser = async (model) => {
-  return await model.sync();
 };

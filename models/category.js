@@ -13,6 +13,10 @@ module.exports = (sequelize) => {
       name: {
         type: Sequelize.TEXT,
       },
+      category_type: {
+        type: Sequelize.ENUM('category_type'),
+        allowNull: true,
+      },
     },
 
     {
@@ -26,10 +30,5 @@ module.exports = (sequelize) => {
     Category.hasMany(models.product, { foreignKey: 'id', as: 'category_id' });
   };
 
-  syncUser(Category);
   return Category;
-};
-
-const syncUser = async (model) => {
-  return await model.sync();
 };
