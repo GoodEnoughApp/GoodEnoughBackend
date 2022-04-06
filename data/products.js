@@ -204,7 +204,7 @@ const getUserProducts = async (userId, categoryId = '') => {
   }
   for (let index = 0; index < allUserProducts.length; index += 1) {
     const tempCategoryId = allUserProducts[index].category_id;
-    const categoryById = categoryData.getCategoryById(tempCategoryId);
+    const categoryById = await categoryData.getCategoryById(tempCategoryId);
     allUserProducts[index].dataValues.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
