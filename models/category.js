@@ -30,6 +30,4 @@ module.exports = (sequelize) => {
   return Category;
 };
 
-const syncUser = async (model) => {
-  return await model.sync();
-};
+const syncUser = async (model) => await model.sync();

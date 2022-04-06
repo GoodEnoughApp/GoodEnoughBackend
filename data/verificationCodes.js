@@ -5,7 +5,7 @@ async function insertCode(code, userId) {
   await models.verification_code
     .create({
       user_id: userId,
-      code: code,
+      code,
     })
     .catch((err) => {
       throw `error: ${err.message}`;
@@ -17,7 +17,7 @@ async function checkCode(userId, code) {
     throw new Error('Invalid or missing requirements');
   }
   const userCode = await models.verification_code.findOne({
-    where: { user_id: userId, code: code },
+    where: { user_id: userId, code },
   });
   if (userCode === null) {
     throw new Error('Invalid or missing requirements');

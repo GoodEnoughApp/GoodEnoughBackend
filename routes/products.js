@@ -2,6 +2,7 @@ const express = require('express');
 const auth = require('../middlewares/jwtAuth');
 const verify = require('../middlewares/validation');
 const productsData = require('../data/products');
+
 const router = express.Router();
 
 // Upsert product using barcode
@@ -65,7 +66,7 @@ router.get('/', auth, async (req, res) => {
       return;
     }
     try {
-      const userId = req.user.userId;
+      const { userId } = req.user;
       const allUserProducts = await productsData.getUserProducts(req.query.categoryId, userId);
       if (allUserProducts.productsFound) {
         res.status(200).json({
@@ -94,7 +95,7 @@ router.get('/', auth, async (req, res) => {
 // Upsert a custom product
 router.put('/custom', auth, async (req, res) => {
   try {
-    let errorParams = [];
+    const errorParams = [];
     const { barcode, name, alias, description, brand, manufacturer, categoryId } = req.body;
     if (barcode === undefined) {
       errorParams.push('barcode');
@@ -196,8 +197,8 @@ router.post('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    let expDate = new Date(Date.parse(expirationDate));
-    let currentDate = new Date();
+    const expDate = new Date(Date.parse(expirationDate));
+    const currentDate = new Date();
     if (expDate.getTime() < currentDate.getTime()) {
       res.status(409).json({
         status: 'error',
@@ -223,7 +224,7 @@ router.post('/:productId', auth, async (req, res) => {
         code: 'ERROR_NOT_ALLOWED',
       });
       return;
-    } else {
+    } 
       try {
         const item = await productsData.addToItem(
           expirationDate,
@@ -242,7 +243,7 @@ router.post('/:productId', auth, async (req, res) => {
         });
         return;
       }
-    }
+    
   } catch (error) {
     res.status(500).json({
       status: 'error',
@@ -280,7 +281,7 @@ router.put('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const userId = req.user.userId;
+    const {userId} = req.user;
     const updateProduct = await productsData.updateProduct(
       req.params.productId,
       userId,
@@ -332,7 +333,7 @@ router.get('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const userId = req.user.userId;
+    const {userId} = req.user;
     const productById = await productsData.getUserProductById(req.params.productId);
     if (productById.productsFound) {
       if (productById.productById.user_id !== userId) {
@@ -343,20 +344,20 @@ router.get('/:productId', auth, async (req, res) => {
         });
         return;
       }
-      delete productById.productById['user_id'];
+      delete productById.productById.user_id;
       res.status(200).json({
         product: productById.productById,
         status: 'success',
       });
       return;
-    } else {
+    } 
       res.status(404).json({
         status: 'error',
         message: 'Product not found',
         code: 'ERROR_NOT_FOUND_PRODUCT',
       });
       return;
-    }
+    
   } catch (error) {
     res.status(500).json({
       status: 'error',
