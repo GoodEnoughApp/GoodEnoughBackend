@@ -1,7 +1,7 @@
-const models = require('../models/index');
 require('pg').defaults.parseInt8 = true;
 const moment = require('moment');
 const { Op } = require('sequelize');
+const models = require('../models/index');
 
 function mapItem(item) {
   const { dataValues } = item;
@@ -28,7 +28,7 @@ function mapItem(item) {
 /**
  * This method is used to show items from item table based on product_id and used condition
  */
-const getItems = async (productId = '', used = '', userId) => {
+const getItems = async (userId, productId = '', used = '') => {
   let allItems;
   const where = {};
   if (productId !== '') {
@@ -93,9 +93,9 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
   );
   if (updatedItem[0] === 1) {
     const newUpdatedItem = await getItemById(itemId);
-    console.log(newUpdatedItem);
     return { itemUpdated: true, item: newUpdatedItem.itemById };
   }
+  return { itemUpdated: false };
 };
 
 /**
@@ -109,9 +109,8 @@ const deleteItem = async (itemId) => {
   });
   if (deletedItem === 1) {
     return { delete: true };
-  } 
-    return { delete: false };
-  
+  }
+  return { delete: false };
 };
 
 /**
@@ -183,23 +182,22 @@ const getReport = async (userId, startDate = '', endDate = '') => {
   }
   if (allItems === null) {
     return { itemsFound: false };
-  } 
-    const allItemsResponse = [];
-    for (let index = 0; index < allItems.length; index++) {
-      const item = {
-        id: allItems[index].dataValues.id,
-        productId: allItems[index].dataValues.product_id,
-        expirationDate: allItems[index].dataValues.expiration_date,
-        createdAt: allItems[index].dataValues.created_at,
-        quantity: allItems[index].dataValues.quantity,
-        initialQuantity: allItems[index].dataValues.initial_quantity,
-        cost: allItems[index].dataValues.cost,
-        isUsed: allItems[index].dataValues.is_used,
-      };
-      allItemsResponse.push(item);
-    }
-    return { itemsFound: true, allItems: allItemsResponse };
-  
+  }
+  const allItemsResponse = [];
+  for (let index = 0; index < allItems.length; index += 1) {
+    const item = {
+      id: allItems[index].dataValues.id,
+      productId: allItems[index].dataValues.product_id,
+      expirationDate: allItems[index].dataValues.expiration_date,
+      createdAt: allItems[index].dataValues.created_at,
+      quantity: allItems[index].dataValues.quantity,
+      initialQuantity: allItems[index].dataValues.initial_quantity,
+      cost: allItems[index].dataValues.cost,
+      isUsed: allItems[index].dataValues.is_used,
+    };
+    allItemsResponse.push(item);
+  }
+  return { itemsFound: true, allItems: allItemsResponse };
 };
 
 module.exports = {

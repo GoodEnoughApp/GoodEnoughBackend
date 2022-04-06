@@ -54,7 +54,7 @@ router.get('/', auth, async (req, res) => {
     if (req.query.startDate || req.query.endDate) {
       allItems = await itemsData.getReport(userId, req.query.startDate, req.query.endDate);
     } else {
-      allItems = await itemsData.getItems(req.query.productId, req.query.used, userId);
+      allItems = await itemsData.getItems(userId, req.query.productId, req.query.used);
     }
     res.status(200).json({
       items: allItems.allItems,
@@ -175,7 +175,6 @@ router.put('/:itemId', auth, async (req, res) => {
       return;
     }
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       status: 'error',
       message: error.message,
@@ -248,8 +247,6 @@ router.delete('/:itemId', auth, async (req, res) => {
     const productById = await productsData.getUserProductById(itemById.itemById.productId);
 
     if (productById.productsFound) {
-      console.log(`User id: ${userId}`);
-      console.log(`Product user id: `, productById);
       if (userId !== productById.productById.userId) {
         res.status(403).json({
           status: 'error',

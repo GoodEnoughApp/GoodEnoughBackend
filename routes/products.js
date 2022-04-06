@@ -67,7 +67,7 @@ router.get('/', auth, async (req, res) => {
     }
     try {
       const { userId } = req.user;
-      const allUserProducts = await productsData.getUserProducts(req.query.categoryId, userId);
+      const allUserProducts = await productsData.getUserProducts(userId, req.query.categoryId);
       if (allUserProducts.productsFound) {
         res.status(200).json({
           products: allUserProducts.allUserProducts,
