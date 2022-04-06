@@ -3,6 +3,7 @@ const auth = require('../middlewares/jwtAuth');
 const verify = require('../middlewares/validation');
 const shoppingData = require('../data/shopping');
 const productsData = require('../data/products');
+
 const router = express.Router();
 
 // To add shopping item
@@ -41,30 +42,31 @@ router.post('/', auth, async (req, res) => {
       });
       return;
     }
-    const userId = req.user.userId;
-    if (userId !== getProductDataById.productById.user_id) {
+    const { userId } = req.user;
+    if (userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
         code: 'ERROR_NOT_ALLOWED',
       });
       return;
-    } else {
-      try {
-        const item = await shoppingData.addShoppingItem(productId, quantity, cost);
-        if (item.isNew) {
-          res.status(201).json({ item: item.shoppingItem, status: 'success' });
-        } else {
-          res.status(200).json({ item: item.shoppingItem, status: 'success' });
-        }
-      } catch (error) {
-        res.status(409).json({
-          status: 'error',
-          message: error.message,
-          code: 'ERROR',
-        });
+    }
+
+    try {
+      const item = await shoppingData.addShoppingItem(productId, quantity, cost);
+
+      if (item.isNew) {
+        res.status(201).json({ item: item.shoppingItem, status: 'success' });
         return;
       }
+      res.status(200).json({ item: item.shoppingItem, status: 'success' });
+    } catch (error) {
+      res.status(409).json({
+        status: 'error',
+        message: error.message,
+        code: 'ERROR',
+      });
+      return;
     }
   } catch (error) {
     res.status(500).json({
@@ -78,7 +80,7 @@ router.post('/', auth, async (req, res) => {
 // To get all shopping list items
 router.get('/', auth, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const { userId } = req.user;
     const allItems = await shoppingData.getShoppingItems(userId);
     if (allItems.itemsFound) {
       res.status(200).json({
@@ -98,6 +100,7 @@ router.get('/', auth, async (req, res) => {
 
 // To update an item
 router.put('/:itemId', auth, async (req, res) => {
+  const { itemId } = req.params;
   try {
     const { quantity, cost } = req.body;
     if (
@@ -114,6 +117,7 @@ router.put('/:itemId', auth, async (req, res) => {
       });
       return;
     }
+
     if (quantity < 0 || cost < 0) {
       res.status(409).json({
         status: 'error',
@@ -122,9 +126,9 @@ router.put('/:itemId', auth, async (req, res) => {
       });
       return;
     }
-    const userId = req.user.userId;
-    const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
-    if (!itemById.itemsFound) {
+    const { userId } = req.user;
+    const item = await shoppingData.getShoppingItemById(itemId);
+    if (!item.itemsFound) {
       res.status(404).json({
         status: 'error',
         message: 'Item not found',
@@ -132,9 +136,10 @@ router.put('/:itemId', auth, async (req, res) => {
       });
       return;
     }
-    const productById = await productsData.getUserProductById(itemById.itemById.product_id);
+
+    const productById = await productsData.getUserProductById(item.itemById.productId);
     if (productById.productsFound) {
-      if (userId !== productById.productById.user_id) {
+      if (userId !== productById.productById.userId) {
         res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',
@@ -143,13 +148,14 @@ router.put('/:itemId', auth, async (req, res) => {
         return;
       }
     }
-    const updatedItem = await shoppingData.updateShoppingItem(req.params.itemId, quantity, cost);
+    const updatedItem = await shoppingData.updateShoppingItem(itemId, quantity, cost);
     if (updatedItem.itemUpdated) {
       res.status(200).json({ item: updatedItem.item, status: 'success' });
     } else {
       throw new Error();
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       status: 'error',
       message: error.message,
@@ -160,43 +166,44 @@ router.put('/:itemId', auth, async (req, res) => {
 
 // To get item using item id
 router.get('/:itemId', auth, async (req, res) => {
+  const { itemId } = req.params;
+  if (!verify.checkIfValidUUID(itemId)) {
+    res.status(422).json({
+      status: 'error',
+      message: 'Missing required values',
+      code: 'ERROR_MISSING_REQUIRED_VALUES',
+    });
+    return;
+  }
   try {
-    if (!verify.checkIfValidUUID(req.params.itemId)) {
-      res.status(422).json({
-        status: 'error',
-        message: 'Missing required values',
-        code: 'ERROR_MISSING_REQUIRED_VALUES',
-      });
-      return;
-    }
-    const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
+    const itemById = await shoppingData.getShoppingItemById(itemId);
     if (itemById.itemsFound) {
-      const userId = req.user.userId;
+      const { userId } = req.user;
       const productById = await productsData.getUserProductById(itemById.itemById.productId);
       if (productById.productsFound) {
-        if (userId !== productById.productById.user_id) {
+        if (userId !== productById.productById.userId) {
           res.status(403).json({
             status: 'error',
             message: 'Not authorized to perform that action',
             code: 'ERROR_NOT_ALLOWED',
           });
           return;
-        } else {
-          res.status(200).json({
-            item: itemById.itemById,
-            status: 'success',
-          });
-          return;
         }
+
+        res.status(200).json({
+          item: itemById.itemById,
+          status: 'success',
+        });
+        return;
       }
-    } else {
-      res.status(404).json({
-        status: 'error',
-        message: 'Item not found',
-        code: 'ERROR_NOT_FOUND_ITEM',
-      });
-      return;
     }
+
+    res.status(404).json({
+      status: 'error',
+      message: 'Item not found',
+      code: 'ERROR_NOT_FOUND_ITEM',
+    });
+    return;
   } catch (error) {
     res.status(500).json({
       status: 'error',
@@ -217,6 +224,7 @@ router.delete('/:itemId', auth, async (req, res) => {
       });
       return;
     }
+
     const itemById = await shoppingData.getShoppingItemById(req.params.itemId);
     if (!itemById.itemsFound) {
       res.status(404).json({
@@ -226,10 +234,10 @@ router.delete('/:itemId', auth, async (req, res) => {
       });
       return;
     }
-    const userId = req.user.userId;
-    const productById = await productsData.getUserProductById(itemById.itemById.product_id);
+    const { userId } = req.user;
+    const productById = await productsData.getUserProductById(itemById.itemById.productId);
     if (productById.productsFound) {
-      if (userId !== productById.productById.user_id) {
+      if (userId !== productById.productById.userId) {
         res.status(403).json({
           status: 'error',
           message: 'Not authorized to perform that action',

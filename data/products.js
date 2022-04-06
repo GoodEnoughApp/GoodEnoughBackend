@@ -1,5 +1,5 @@
-const models = require('../models/index');
 const axios = require('axios');
+const models = require('../models/index');
 const categoryData = require('./category');
 require('dotenv').config();
 require('pg').defaults.parseInt8 = true;
@@ -12,15 +12,15 @@ const baseURL = 'https://api.upcdatabase.org/product';
 const findUserProductUsingBarcode = async (barcode, userId) => {
   const userProduct = await models.user_product.findOne({
     where: {
-      barcode: barcode,
+      barcode,
       user_id: userId,
     },
   });
   if (userProduct !== null) {
     return { found: true, userProduct: userProduct.dataValues };
-  } else {
-    return { found: false };
   }
+
+  return { found: false };
 };
 
 /**
@@ -29,27 +29,27 @@ const findUserProductUsingBarcode = async (barcode, userId) => {
 const findProductUsingBarcode = async (barcode) => {
   const product = await models.product.findOne({
     where: {
-      barcode: barcode,
+      barcode,
     },
   });
   if (product !== null) {
     return { found: true, product: product.dataValues };
-  } else {
-    return { found: false };
   }
+
+  return { found: false };
 };
 
 /**
  * This method is used to find product in UPC database using barcode as a param
  */
 const findUpcProductUsingBarcode = async (barcode) => {
-  let url = `${baseURL}/${barcode}?apikey=${process.env.UPC_API_KEY}`;
+  const url = `${baseURL}/${barcode}?apikey=${process.env.UPC_API_KEY}`;
   const upcProduct = await axios.get(url);
   if (upcProduct.data.success === true) {
     return { found: true, upcProduct: upcProduct.data };
-  } else {
-    return { found: false };
   }
+
+  return { found: false };
 };
 
 /**
@@ -62,20 +62,20 @@ const findUpcProductUsingBarcode = async (barcode) => {
 const addProduct = async (barcode, userId) => {
   const userProduct = await findUserProductUsingBarcode(barcode, userId);
   if (userProduct.found) {
-    let tempCategoryId = userProduct.userProduct.category_id;
-    let categoryById = await categoryData.getCategoryById(tempCategoryId);
+    const tempCategoryId = userProduct.userProduct.category_id;
+    const categoryById = await categoryData.getCategoryById(tempCategoryId);
     userProduct.userProduct.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
-    delete userProduct.userProduct['category_id'];
-    delete userProduct.userProduct['user_id'];
+    delete userProduct.userProduct.category_id;
+    delete userProduct.userProduct.user_id;
     return {
       type: 'USER_PRODUCT',
       product: userProduct.userProduct,
       found: true,
     };
-  } else {
+  } 
     const product = await findProductUsingBarcode(barcode);
     if (product.found) {
       const userProductCreated = await createUserProductFromProduct(
@@ -83,21 +83,21 @@ const addProduct = async (barcode, userId) => {
         barcode,
         product.product
       );
-      let tempCategoryId = userProductCreated.category_id;
-      let categoryById = await categoryData.getCategoryById(tempCategoryId);
+      const tempCategoryId = userProductCreated.category_id;
+      const categoryById = await categoryData.getCategoryById(tempCategoryId);
       userProductCreated.category = {
         id: categoryById.categoryById.id,
         name: categoryById.categoryById.name,
       };
       userProductCreated.type = 'barcode';
-      delete userProductCreated['category_id'];
-      delete userProductCreated['user_id'];
+      delete userProductCreated.category_id;
+      delete userProductCreated.user_id;
       return {
         type: 'PRODUCT',
         product: userProductCreated,
         found: true,
       };
-    } else {
+    } 
       const upcProduct = await findUpcProductUsingBarcode(barcode);
       if (upcProduct.found) {
         const category = await categoryData.addCategory(
@@ -127,11 +127,11 @@ const addProduct = async (barcode, userId) => {
           product: createdProduct,
           found: true,
         };
-      } else {
+      } 
         return { found: false };
-      }
-    }
-  }
+      
+    
+  
 };
 
 /**
@@ -141,7 +141,7 @@ const createProductUsingUPC = async (barcode, upcProduct, userId, categoryId) =>
   try {
     const addedProduct = await models.product.findOrCreate({
       where: {
-        barcode: barcode,
+        barcode,
         barcode_type: 'UPC',
         name: upcProduct.title,
         category_id: categoryId,
@@ -163,7 +163,7 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
       where: {
         user_id: userId,
         category_id: categoryId,
-        barcode: barcode,
+        barcode,
         barcode_type: 'UPC',
         name: upcProduct.title,
         alias: upcProduct.alias,
@@ -182,31 +182,30 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
  * This method is used to find product(s) in user_product table using categoryId as a param
  */
 const getUserProducts = async (categoryId = '', userId) => {
-  let allUserProducts;
-  let where = {};
+  const where = {};
   if (categoryId.trim() !== '') {
     where.category_id = categoryId;
   }
   where.user_id = userId;
-  allUserProducts = await models.user_product.findAll({
-    where: where,
+  const allUserProducts = await models.user_product.findAll({
+    where,
   });
   if (allUserProducts === null) {
     return { productsFound: false };
-  } else {
+  } 
     for (let index = 0; index < allUserProducts.length; index++) {
-      let tempCategoryId = allUserProducts[index].category_id;
-      let categoryById = await categoryData.getCategoryById(tempCategoryId);
+      const tempCategoryId = allUserProducts[index].category_id;
+      const categoryById = await categoryData.getCategoryById(tempCategoryId);
       allUserProducts[index].dataValues.category = {
         id: categoryById.categoryById.id,
         name: categoryById.categoryById.name,
       };
       allUserProducts[index].dataValues.type = 'barcode';
-      delete allUserProducts[index].dataValues['category_id'];
-      delete allUserProducts[index].dataValues['user_id'];
+      delete allUserProducts[index].dataValues.category_id;
+      delete allUserProducts[index].dataValues.user_id;
     }
-    return { productsFound: true, allUserProducts: allUserProducts };
-  }
+    return { productsFound: true, allUserProducts };
+  
 };
 
 /**
@@ -218,22 +217,24 @@ const getUserProductById = async (id) => {
   }
   const productById = await models.user_product.findOne({
     where: {
-      id: id,
+      id,
     },
   });
   if (productById === null) {
     return { productsFound: false };
-  } else {
-    let tempCategoryId = productById.dataValues.category_id;
-    let categoryById = await categoryData.getCategoryById(tempCategoryId);
+  } 
+    const tempCategoryId = productById.dataValues.category_id;
+    const categoryById = await categoryData.getCategoryById(tempCategoryId);
     productById.dataValues.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
+    productById.dataValues.userId = productById.dataValues.user_id;
     productById.dataValues.type = 'barcode';
-    delete productById.dataValues['category_id'];
+    delete productById.dataValues.category_id;
+    delete productById.dataValues.user_id;
     return { productsFound: true, productById: productById.dataValues };
-  }
+  
 };
 
 /**
@@ -253,9 +254,9 @@ const addCustomProduct = async (
   try {
     const addedProduct = await models.product.findOrCreate({
       where: {
-        barcode: barcode,
+        barcode,
         barcode_type: 'EAN',
-        name: name,
+        name,
         category_id: categoryId,
       },
     });
@@ -263,23 +264,23 @@ const addCustomProduct = async (
       where: {
         user_id: userId,
         category_id: categoryId,
-        barcode: barcode,
+        barcode,
         barcode_type: 'EAN',
-        name: name,
-        alias: alias,
-        description: description,
-        brand: brand,
-        manufacturer: manufacturer,
+        name,
+        alias,
+        description,
+        brand,
+        manufacturer,
       },
     });
-    let tempCategoryId = addedUserProduct[0].dataValues.category_id;
-    let categoryById = await categoryData.getCategoryById(tempCategoryId);
+    const tempCategoryId = addedUserProduct[0].dataValues.category_id;
+    const categoryById = await categoryData.getCategoryById(tempCategoryId);
     addedUserProduct[0].dataValues.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
-    delete addedUserProduct[0].dataValues['category_id'];
-    delete addedUserProduct[0].dataValues['user_id'];
+    delete addedUserProduct[0].dataValues.category_id;
+    delete addedUserProduct[0].dataValues.user_id;
     return {
       customProduct: addedUserProduct[0].dataValues,
       isNew: addedUserProduct[0]._options.isNewRecord,
@@ -293,7 +294,7 @@ const addCustomProduct = async (
  * Method to add item in Item table referencing a user product
  */
 const addToItem = async (expirationDate, quantity, cost, productId) => {
-  let currentDate = new Date().toISOString();
+  const currentDate = new Date().toISOString();
   const addedItem = await models.item.create({
     product_id: productId,
     expiration_date: expirationDate,
@@ -305,9 +306,9 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
   });
   if (addedItem === null) {
     return { itemAdded: false };
-  } else {
+  } 
     return { itemAdded: true, addedItem: addedItem.dataValues };
-  }
+  
 };
 
 const deleteProduct = async (productId) => {
@@ -318,9 +319,9 @@ const deleteProduct = async (productId) => {
   });
   if (deletedProduct === 1) {
     return { delete: true };
-  } else {
+  } 
     return { delete: false };
-  }
+  
 };
 
 const createUserProductFromProduct = async (userId, barcode, product) => {
@@ -329,7 +330,7 @@ const createUserProductFromProduct = async (userId, barcode, product) => {
       where: {
         user_id: userId,
         category_id: product.category_id,
-        barcode: barcode,
+        barcode,
         barcode_type: product.barcode_type,
         name: product.name,
         alias: product.alias !== undefined ? product.alias : '',
@@ -368,12 +369,12 @@ const updateProduct = async (
   }
   const updatedProduct = await models.user_product.update(
     {
-      barcode: barcode,
-      name: name,
-      alias: alias,
-      description: description,
-      brand: brand,
-      manufacturer: manufacturer,
+      barcode,
+      name,
+      alias,
+      description,
+      brand,
+      manufacturer,
       category_id: categoryId,
     },
     {
