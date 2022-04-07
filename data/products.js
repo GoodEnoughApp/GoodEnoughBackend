@@ -204,6 +204,8 @@ const getUserProducts = async (userId, categoryId = '') => {
   }
   for (let index = 0; index < allUserProducts.length; index += 1) {
     const tempCategoryId = allUserProducts[index].category_id;
+    // Sid code - Issue araised here when I ran the code
+    // eslint-disable-next-line no-await-in-loop
     const categoryById = await categoryData.getCategoryById(tempCategoryId);
     allUserProducts[index].dataValues.category = {
       id: categoryById.categoryById.id,

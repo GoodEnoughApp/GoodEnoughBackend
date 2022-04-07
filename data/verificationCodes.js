@@ -8,7 +8,7 @@ async function insertCode(code, userId) {
       code,
     })
     .catch((err) => {
-      throw `error: ${err.message}`;
+      throw err;
     });
 }
 
@@ -28,15 +28,15 @@ async function checkCode(userId, code) {
 
 // verification code
 async function getCode(userId) {
-  const getCode = await models.verification_code
+  const getUserCode = await models.verification_code
     .findOne({
       where: { user_id: userId },
     })
     .catch((err) => {
-      throw `error: ${err.message}`;
+      throw err;
     });
 
-  return getCode.code;
+  return getUserCode.code;
 }
 
 module.exports = {
