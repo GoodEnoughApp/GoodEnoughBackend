@@ -219,9 +219,9 @@ router.put('/me', auth, async (req, res) => {
       code: 'ERROR_MISSING_REQUIRED_VALUES',
     });
   }
-  const { name, pass } = req.body;
+  const { name, password } = req.body;
   try {
-    if (userData.checkPassword(pass)) {
+    if (userData.checkPassword(password)) {
       // check if password < 8
       return res.status(422).json({
         status: 'error',
@@ -230,7 +230,7 @@ router.put('/me', auth, async (req, res) => {
       });
     }
     const userId = await userData.getID(req.user.email);
-    await userData.updateUser(userId, name, pass);
+    await userData.updateUser(userId, name, password);
     return res.status(200).json({
       status: 'success',
       message: 'Success',
@@ -244,6 +244,7 @@ router.put('/me', auth, async (req, res) => {
     });
   }
 });
+
 // get user information
 router.get('/me', auth, async (req, res) => {
   try {
