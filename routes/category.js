@@ -1,6 +1,7 @@
 const express = require('express');
 const auth = require('../middlewares/jwtAuth');
 const categoryData = require('../data/category');
+
 const router = express.Router();
 
 // Get list of all categories

@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
-const models = require('../models/index');
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-handlebars');
+const models = require('../models/index');
 
 // Insert a record
 async function insertUser(name, email, password, isActivated) {
@@ -13,7 +13,7 @@ async function insertUser(name, email, password, isActivated) {
       is_activated: isActivated,
     })
     .catch((err) => {
-      throw `error: ${err.message}`;
+      throw err;
     });
 }
 
@@ -27,7 +27,7 @@ async function checkEmail(email) {
       },
     })
     .catch((err) => {
-      throw `error: ${err.message}`;
+      throw err;
     });
   if (!emails.length) return true;
   return false;
@@ -35,16 +35,16 @@ async function checkEmail(email) {
 
 // return ID from Email
 async function getID(email) {
-  email = email.toString().trim().toLowerCase();
-  const getUser = await models.user
+  const userEmail = email.toString().trim().toLowerCase();
+  const userDetails = await models.user
     .findOne({
-      where: { email: email },
+      where: { email: userEmail },
     })
     .catch((err) => {
-      throw `error: ${err.message}`;
+      throw err;
     });
 
-  return getUser.id;
+  return userDetails.id;
 }
 
 // check password length - Sign up
@@ -80,8 +80,19 @@ const checkUser = async (email, password) => {
   }
 };
 
+// Get random characters
+function getRandomString(length) {
+  const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+  }
+  return result;
+}
+
 // forget password
 async function tempPass(email) {
+  let pass;
   if (!email) {
     throw new Error('Invalid or missing requirements');
   }
@@ -91,7 +102,7 @@ async function tempPass(email) {
   if (userData === null) {
     throw new Error('Invalid or missing requirements');
   } else {
-    var pass = getRandomString(8);
+    pass = getRandomString(8);
     const hashedpassword = await bcrypt.hash(pass, 10);
 
     await models.user.update({ password: hashedpassword }, { where: { id: userData.id } });
@@ -99,28 +110,18 @@ async function tempPass(email) {
   return pass;
 }
 
-// Get random characters
-function getRandomString(length) {
-  var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var result = '';
-  for (var i = 0; i < length; i++) {
-    result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-  }
-  return result;
-}
-
 // return user from Email
 async function getUser(email) {
-  email = email.trim().toLowerCase();
-  const getUser = await models.user
+  const userEmail = email.trim().toLowerCase();
+  const getOneUser = await models.user
     .findOne({
-      where: { email: email },
+      where: { email: userEmail },
     })
     .catch((err) => {
-      throw `error: ${err.message}`;
+      throw err;
     });
 
-  return getUser;
+  return getOneUser;
 }
 
 // update: password - user name
@@ -130,30 +131,32 @@ async function updateUser(userId, name, password) {
   }
   const hashedpassword = await bcrypt.hash(password, 10);
 
-  await models.user.update({ name: name, password: hashedpassword }, { where: { id: userId } });
+  await models.user.update({ name, password: hashedpassword }, { where: { id: userId } });
 }
 
 // Start: Code added by Jose.
+
+function padLeadingZeros(num, size) {
+  let s = `${num}`;
+  while (s.length < size) s = `0${s}`;
+  return s;
+}
+
+function randomNumber(min, max) {
+  const minNum = Math.ceil(min);
+  const maxNum = Math.floor(max);
+  return Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+}
+
 function getActivationCode() {
   return padLeadingZeros(randomNumber(0, 999999), 6);
 }
 
-function randomNumber(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function padLeadingZeros(num, size) {
-  let s = num + '';
-  while (s.length < size) s = '0' + s;
-  return s;
-}
 // end
 
 // Setup email
 function emailSetup(title, templateName, userName, email, code) {
-  let transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.Email,
@@ -171,18 +174,17 @@ function emailSetup(title, templateName, userName, email, code) {
       viewPath: './views/',
     })
   );
-  let mailOptions = {
+  const mailOptions = {
     from: process.env.Email,
     to: email,
     subject: title,
     template: templateName,
     context: {
-      userName: userName,
-      code: code,
+      userName,
+      code,
     },
   };
   transporter.sendMail(mailOptions);
-  return;
 }
 
 const getUserById = async (userId) => {
@@ -193,7 +195,7 @@ const getUserById = async (userId) => {
       },
     })
     .catch((err) => {
-      throw `error: ${err.message}`;
+      throw err;
     });
   return user;
 };
@@ -210,5 +212,5 @@ module.exports = {
   getActivationCode,
   emailSetup,
   getUserById,
-  //getRandomString,
+  // getRandomString,
 };

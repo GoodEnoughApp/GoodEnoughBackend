@@ -2,6 +2,7 @@ const express = require('express');
 const auth = require('../middlewares/jwtAuth');
 const verify = require('../middlewares/validation');
 const productsData = require('../data/products');
+
 const router = express.Router();
 
 // Upsert product using barcode
@@ -65,8 +66,8 @@ router.get('/', auth, async (req, res) => {
       return;
     }
     try {
-      const userId = req.user.userId;
-      const allUserProducts = await productsData.getUserProducts(req.query.categoryId, userId);
+      const { userId } = req.user;
+      const allUserProducts = await productsData.getUserProducts(userId, req.query.categoryId);
       if (allUserProducts.productsFound) {
         res.status(200).json({
           products: allUserProducts.allUserProducts,
@@ -94,7 +95,7 @@ router.get('/', auth, async (req, res) => {
 // Upsert a custom product
 router.put('/custom', auth, async (req, res) => {
   try {
-    let errorParams = [];
+    const errorParams = [];
     const { barcode, name, alias, description, brand, manufacturer, categoryId } = req.body;
     if (barcode === undefined) {
       errorParams.push('barcode');
@@ -196,8 +197,8 @@ router.post('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    let expDate = new Date(Date.parse(expirationDate));
-    let currentDate = new Date();
+    const expDate = new Date(Date.parse(expirationDate));
+    const currentDate = new Date();
     if (expDate.getTime() < currentDate.getTime()) {
       res.status(409).json({
         status: 'error',
@@ -299,7 +300,7 @@ router.put('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    if (!updateProduct.categoryFound) {
+    if (updateProduct.categoryFound === false) {
       res.status(422).json({
         status: 'error',
         message: 'Wrong Category Id',

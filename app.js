@@ -16,6 +16,7 @@ app.use(
 // model.shopping_list_item.findAll().then((data) => console.log(data));
 configRoutes(app);
 app.use(express.urlencoded({ extended: true }));
-app.listen(process.env.PORT || 3000, () => {
-  console.log("We've now got a server!");
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  // console.log(`Application running on port: ${port}`);
 });

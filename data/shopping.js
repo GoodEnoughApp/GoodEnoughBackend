@@ -1,21 +1,33 @@
 const models = require('../models/index');
 require('pg').defaults.parseInt8 = true;
 
+function mapAllItems(item) {
+  return {
+    id: item.dataValues.id,
+    productId: item.dataValues.product_id,
+    createdAt: item.dataValues.created_at,
+    quantity: item.dataValues.quantity,
+    cost: item.dataValues.cost,
+    isUsed: item.dataValues.is_used,
+  };
+}
+
 const addShoppingItem = async (productId, quantity, cost) => {
-  let currentDate = new Date().toISOString();
+  const currentDate = new Date().toISOString();
   const addedShoppingItem = await models.shopping_list_item.findOrCreate({
     where: {
       product_id: productId,
     },
     defaults: {
       product_id: productId,
-      quantity: quantity,
-      cost: cost,
+      quantity,
+      cost,
       created_at: currentDate,
     },
   });
   return {
-    shoppingItem: addedShoppingItem[0].dataValues,
+    shoppingItem: mapAllItems(addedShoppingItem[0]),
+    // eslint-disable-next-line no-underscore-dangle
     isNew: addedShoppingItem[0]._options.isNewRecord,
   };
 };
@@ -24,7 +36,7 @@ const addShoppingItem = async (productId, quantity, cost) => {
  * This method is used to show all shopping items from shopping_list_item
  */
 const getShoppingItems = async (userId) => {
-  allItems = await models.shopping_list_item.findAll({
+  const allItems = await models.shopping_list_item.findAll({
     include: [
       {
         model: models.user_product,
@@ -36,12 +48,12 @@ const getShoppingItems = async (userId) => {
   });
   if (allItems == null) {
     return { itemsFound: false };
-  } else {
-    for (let index = 0; index < allItems.length; index++) {
-      delete allItems[index].dataValues['user_product'];
-    }
-    return { itemsFound: true, allItems: allItems };
   }
+
+  return {
+    itemsFound: true,
+    allItems: allItems.map(mapAllItems),
+  };
 };
 
 /**
@@ -50,24 +62,25 @@ const getShoppingItems = async (userId) => {
 const getShoppingItemById = async (id) => {
   const itemById = await models.shopping_list_item.findOne({
     where: {
-      id: id,
+      id,
     },
   });
   if (itemById == null) {
     return { itemsFound: false };
-  } else {
-    return { itemsFound: true, itemById: itemById.dataValues };
   }
+
+  return { itemsFound: true, itemById: mapAllItems(itemById) };
 };
 
 /**
  * This method is used to update a shopping item in shopping_list_item table
  */
+// eslint-disable-next-line consistent-return
 const updateShoppingItem = async (shoppingItemId, quantity, cost) => {
   const updatedItem = await models.shopping_list_item.update(
     {
-      quantity: quantity,
-      cost: cost,
+      quantity,
+      cost,
     },
     {
       where: {
@@ -92,9 +105,9 @@ const deleteShoppingItem = async (shoppingItemId) => {
   });
   if (deletedItem === 1) {
     return { delete: true };
-  } else {
-    return { delete: false };
   }
+
+  return { delete: false };
 };
 
 module.exports = {

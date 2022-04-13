@@ -1,14 +1,36 @@
-const models = require('../models/index');
 require('pg').defaults.parseInt8 = true;
 const moment = require('moment');
 const { Op } = require('sequelize');
+const models = require('../models/index');
+
+function mapItem(item) {
+  const { dataValues } = item;
+  // eslint-disable-next-line camelcase
+  const { id, product_id, expiration_date, created_at, quantity, initial_quantity, cost, is_used } =
+    dataValues;
+  return {
+    id,
+    quantity,
+    cost,
+    // eslint-disable-next-line camelcase
+    isUsed: is_used,
+    // eslint-disable-next-line camelcase
+    initialQuantity: initial_quantity,
+    // eslint-disable-next-line camelcase
+    createdAt: created_at,
+    // eslint-disable-next-line camelcase
+    expirationDate: expiration_date,
+    // eslint-disable-next-line camelcase
+    productId: product_id,
+  };
+}
 
 /**
  * This method is used to show items from item table based on product_id and used condition
  */
-const getItems = async (productId = '', used = '', userId) => {
+const getItems = async (userId, productId = '', used = '') => {
   let allItems;
-  let where = {};
+  const where = {};
   if (productId !== '') {
     where.product_id = productId;
   }
@@ -24,16 +46,13 @@ const getItems = async (productId = '', used = '', userId) => {
         },
       },
     ],
-    where: where,
+    where,
   });
   if (allItems === null) {
     return { itemsFound: false };
-  } else {
-    for (let index = 0; index < allItems.length; index++) {
-      delete allItems[index].dataValues['user_product'];
-    }
-    return { itemsFound: true, allItems: allItems };
   }
+  allItems = allItems.map(mapItem);
+  return { itemsFound: true, allItems };
 };
 
 /**
@@ -45,14 +64,13 @@ const getItemById = async (id) => {
   }
   const itemById = await models.item.findOne({
     where: {
-      id: id,
+      id,
     },
   });
   if (itemById == null) {
     return { itemsFound: false };
-  } else {
-    return { itemsFound: true, itemById: itemById.dataValues };
   }
+  return { itemsFound: true, itemById: mapItem(itemById) };
 };
 
 /**
@@ -62,9 +80,9 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
   const updatedItem = await models.item.update(
     {
       expiration_date: expirationDate,
-      quantity: quantity,
+      quantity,
       initial_quantity: initialQuantity,
-      cost: cost,
+      cost,
       is_used: isUsed,
     },
     {
@@ -77,6 +95,7 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
     const newUpdatedItem = await getItemById(itemId);
     return { itemUpdated: true, item: newUpdatedItem.itemById };
   }
+  return { itemUpdated: false };
 };
 
 /**
@@ -90,9 +109,8 @@ const deleteItem = async (itemId) => {
   });
   if (deletedItem === 1) {
     return { delete: true };
-  } else {
-    return { delete: false };
   }
+  return { delete: false };
 };
 
 /**
@@ -100,8 +118,8 @@ const deleteItem = async (itemId) => {
  */
 const getReport = async (userId, startDate = '', endDate = '') => {
   let allItems;
-  var sDate;
-  var eDate;
+  let sDate;
+  let eDate;
   if (startDate !== '' && endDate !== '') {
     sDate = new Date(startDate);
     eDate = new Date(endDate);
@@ -164,12 +182,22 @@ const getReport = async (userId, startDate = '', endDate = '') => {
   }
   if (allItems === null) {
     return { itemsFound: false };
-  } else {
-    for (let index = 0; index < allItems.length; index++) {
-      delete allItems[index].dataValues['user_product'];
-    }
-    return { itemsFound: true, allItems: allItems };
   }
+  const allItemsResponse = [];
+  for (let index = 0; index < allItems.length; index += 1) {
+    const item = {
+      id: allItems[index].dataValues.id,
+      productId: allItems[index].dataValues.product_id,
+      expirationDate: allItems[index].dataValues.expiration_date,
+      createdAt: allItems[index].dataValues.created_at,
+      quantity: allItems[index].dataValues.quantity,
+      initialQuantity: allItems[index].dataValues.initial_quantity,
+      cost: allItems[index].dataValues.cost,
+      isUsed: allItems[index].dataValues.is_used,
+    };
+    allItemsResponse.push(item);
+  }
+  return { itemsFound: true, allItems: allItemsResponse };
 };
 
 module.exports = {
