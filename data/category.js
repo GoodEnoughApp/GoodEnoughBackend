@@ -9,7 +9,7 @@ function mapItem(value) {
     id,
     name,
     // eslint-disable-next-line camelcase
-    categoryType: category_type,
+    type: category_type,
   };
 }
 
