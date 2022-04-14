@@ -42,16 +42,22 @@ const getCategoryById = async (id) => {
   return { categoryFound: true, categoryById: categoryById.dataValues };
 };
 
-// This method is used to insert a unique category in Category table.
-const addCategory = async (categoryName = 'other') => {
-  const newCategory = await models.category.findOrCreate({
-    where: { name: categoryName, category_type: categoryName },
+// // This method is used to insert a unique category in Category table.
+const useCategory = async (name) => {
+  const categoryById = await models.category.findOne({
+    where: {
+      name,
+    },
   });
-  return newCategory;
+  if (categoryById === null) {
+    const otherId = await models.category.findOne({ where: { name: 'other' } });
+    return otherId;
+  }
+  return categoryById;
 };
 
 module.exports = {
   getCategory,
-  addCategory,
+  useCategory,
   getCategoryById,
 };
