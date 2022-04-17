@@ -1,5 +1,18 @@
 const { Op } = require('sequelize');
 const models = require('../models/index');
+const { Op } = require('sequelize');
+
+function mapItem(value) {
+  const { dataValues } = value;
+  // eslint-disable-next-line camelcase
+  const { id, name, category_type } = dataValues;
+  return {
+    id,
+    name,
+    // eslint-disable-next-line camelcase
+    categoryType: category_type,
+  };
+}
 
 function mapItem(value) {
   const { dataValues } = value;
