@@ -6,7 +6,7 @@ const models = require('../models/index');
 function mapItem(item) {
   const { dataValues } = item;
   // eslint-disable-next-line camelcase
-  const { id, product_id, expiration_date, created_at, quantity, initial_quantity, cost, is_used } =
+  const { id, product_id, expiration_date, created_at, quantity, initial_quantity, cost, is_used, is_expired, end_at } =
     dataValues;
   return {
     id,
@@ -22,6 +22,10 @@ function mapItem(item) {
     expirationDate: expiration_date,
     // eslint-disable-next-line camelcase
     productId: product_id,
+    // eslint-disable-next-line camelcase
+    isExpired: is_expired,
+    // eslint-disable-next-line camelcase
+    endAt: end_at,
   };
 }
 
@@ -76,7 +80,8 @@ const getItemById = async (id) => {
 /**
  * This method is used to update an item in Item table
  */
-const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cost, isUsed) => {
+const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cost, isUsed, isExpired) => {
+  const currentDate = new Date().toISOString();
   const updatedItem = await models.item.update(
     {
       expiration_date: expirationDate,
@@ -84,6 +89,8 @@ const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cos
       initial_quantity: initialQuantity,
       cost,
       is_used: isUsed,
+      is_expired: isExpired,
+      end_at: currentDate,
     },
     {
       where: {
@@ -135,7 +142,8 @@ const getReport = async (userId, startDate = '', endDate = '') => {
         },
       ],
       where: {
-        is_used: false,
+       // is_used: false,
+      // is_expired: false,
         expiration_date: {
           [Op.between]: [sDate, eDate],
         },
@@ -154,7 +162,8 @@ const getReport = async (userId, startDate = '', endDate = '') => {
         },
       ],
       where: {
-        is_used: false,
+       // is_used: false,
+      // is_expired: false,
         expiration_date: {
           [Op.gte]: sDate,
         },
@@ -173,7 +182,8 @@ const getReport = async (userId, startDate = '', endDate = '') => {
         },
       ],
       where: {
-        is_used: false,
+       // is_used: false,
+      // is_expired: false,
         expiration_date: {
           [Op.lte]: eDate,
         },
@@ -194,6 +204,8 @@ const getReport = async (userId, startDate = '', endDate = '') => {
       initialQuantity: allItems[index].dataValues.initial_quantity,
       cost: allItems[index].dataValues.cost,
       isUsed: allItems[index].dataValues.is_used,
+      isExpired: allItems[index].dataValues.is_expired,
+      endAt: allItems[index].dataValues.end_at,
     };
     allItemsResponse.push(item);
   }
