@@ -161,7 +161,7 @@ const addProduct = async (barcode, userId) => {
   }
   const upcProduct = await findUpcProductUsingBarcode(barcode);
   if (upcProduct.found) {
-    const category = await categoryData.addCategory(upcProduct.upcProduct.category.toLowerCase());
+    const category = await categoryData.useCategory(upcProduct.upcProduct.category.toLowerCase());
     if (upcProduct.upcProduct.title !== undefined && upcProduct.upcProduct.title.trim() === '') {
       if (
         upcProduct.upcProduct.description !== undefined &&
@@ -176,7 +176,7 @@ const addProduct = async (barcode, userId) => {
       barcode,
       upcProduct.upcProduct,
       userId,
-      category[0].dataValues.id
+      category.dataValues.id
     );
     return {
       type: 'UPC_PRODUCT',

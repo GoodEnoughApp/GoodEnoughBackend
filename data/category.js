@@ -1,14 +1,34 @@
+const { Op } = require('sequelize');
 const models = require('../models/index');
+
+function mapItem(value) {
+  const { dataValues } = value;
+  // eslint-disable-next-line camelcase
+  const { id, name, category_type } = dataValues;
+  return {
+    id,
+    name,
+    // eslint-disable-next-line camelcase
+    type: category_type,
+  };
+}
 
 /**
  * This method is used to get all categories from Category table
  */
 const getCategory = async () => {
-  const allCategory = await models.category.findAll();
-  if (allCategory == null || allCategory.length === 0) {
-    return { categoryFound: false };
+  let allCategory = await models.category.findAll({
+    where: {
+      category_type: {
+        [Op.not]: null,
+      },
+    },
+  });
+  if (allCategory != null) {
+    allCategory = allCategory.map(mapItem);
+    return { categoryFound: true, allCategory };
   }
-  return { categoryFound: true, allCategory };
+  return { categoryFound: false };
 };
 
 /**
@@ -22,16 +42,22 @@ const getCategoryById = async (id) => {
   return { categoryFound: true, categoryById: categoryById.dataValues };
 };
 
-// This method is used to insert a unique category in Category table.
-const addCategory = async (categoryName = 'other') => {
-  const newCategory = await models.category.findOrCreate({
-    where: { name: categoryName },
+// // This method is used to insert a unique category in Category table.
+const useCategory = async (name) => {
+  const categoryById = await models.category.findOne({
+    where: {
+      name,
+    },
   });
-  return newCategory;
+  if (categoryById === null) {
+    const otherId = await models.category.findOne({ where: { name: 'other' } });
+    return otherId;
+  }
+  return categoryById;
 };
 
 module.exports = {
   getCategory,
-  addCategory,
+  useCategory,
   getCategoryById,
 };
