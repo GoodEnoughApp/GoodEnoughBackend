@@ -313,6 +313,7 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
     initial_quantity: 0,
     cost: parseFloat(cost),
     is_used: false,
+    is_expired: false,
   });
   if (addedItem === null) {
     return { itemAdded: false };

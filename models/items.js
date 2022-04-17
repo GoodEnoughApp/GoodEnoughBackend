@@ -31,6 +31,12 @@ module.exports = (sequelize) => {
       is_used: {
         type: Sequelize.BOOLEAN,
       },
+      is_expired: {
+        type: Sequelize.BOOLEAN,
+      },
+      end_at: {
+        type: Sequelize.DATE,
+      },
     },
 
     {
