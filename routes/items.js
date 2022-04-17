@@ -114,6 +114,9 @@ router.put('/:itemId', auth, async (req, res) => {
     if (!verify.validBoolean(isUsed)) {
       errorParams.push('isUsed');
     }
+    if (!verify.checkIfValidUUID(itemId)) {
+      errorParams.push('itemId');
+    }
     if (errorParams.length > 0) {
       res.status(422).json({
         status: 'error',
