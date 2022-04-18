@@ -133,8 +133,8 @@ const addProduct = async (barcode, userId) => {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
-    userProduct.barcodeType = userProduct.barcode_type;
-    userProduct.type = 'barcode';
+    userProduct.userProduct.barcodeType = userProduct.userProduct.barcode_type;
+    userProduct.userProduct.type = 'barcode';
     delete userProduct.userProduct.category_id;
     delete userProduct.userProduct.user_id;
     delete userProduct.userProduct.barcode_type;
