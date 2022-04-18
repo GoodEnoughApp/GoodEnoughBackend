@@ -119,6 +119,9 @@ router.put('/:itemId', auth, async (req, res) => {
     if (!verify.validBoolean(isUsed)) {
       errorParams.push('isUsed');
     }
+    if (!verify.checkIfValidUUID(itemId)) {
+      errorParams.push('itemId');
+    }
     if (errorParams.length > 0) {
       res.status(422).json({
         status: 'error',
@@ -159,14 +162,14 @@ router.put('/:itemId', auth, async (req, res) => {
       return;
     }
 
-if (itemById.itemById.isExpired === true)
-{ res.status(409).json({
-  status: 'error',
-  message: 'The user try to change an item that reach an end state',
-  code: 'ERROR_ITEM_FINAL_STATE',
-});
-return;
-}
+    if (itemById.itemById.isExpired === true) {
+      res.status(409).json({
+        status: 'error',
+        message: 'The user try to change an item that reach an end state',
+        code: 'ERROR_ITEM_FINAL_STATE',
+      });
+      return;
+    }
 
     try {
       const updatedItem = await itemsData.updateItem(
