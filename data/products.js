@@ -5,6 +5,7 @@ require('dotenv').config();
 require('pg').defaults.parseInt8 = true;
 
 const baseURL = 'https://api.upcdatabase.org/product';
+const baseURLItemDb = 'https://api.upcitemdb.com/prod/trial/lookup?upc=';
 
 /**
  * This method is used to find product in user_product table using barcode as a param
@@ -48,8 +49,21 @@ const findUpcProductUsingBarcode = async (barcode) => {
   if (upcProduct.data.success === true) {
     return { found: true, upcProduct: upcProduct.data };
   }
-
   return { found: false };
+};
+
+/**
+ * This method is used to find product in UPC database using barcode as a param
+ */
+const findUpcItemDbProductUsingBarcode = async (barcode) => {
+  let upcProduct;
+  const url = `${baseURLItemDb}${barcode}`;
+  try {
+    upcProduct = await axios.get(url);
+  } catch (error) {
+    return { found: false };
+  }
+  return { found: true, upcProduct: upcProduct.data.items[0] };
 };
 
 const createUserProductFromProduct = async (userId, barcode, product) => {
@@ -85,10 +99,10 @@ const createUserProductUsingUPC = async (barcode, upcProduct, userId, categoryId
         barcode,
         barcode_type: 'UPC',
         name: upcProduct.title,
-        alias: upcProduct.alias,
-        description: upcProduct.description,
-        brand: upcProduct.brand,
-        manufacturer: upcProduct.manufacturer,
+        alias: upcProduct.alias !== undefined ? upcProduct.alias : '',
+        description: upcProduct.description !== undefined ? upcProduct.description : '',
+        brand: upcProduct.brand !== undefined ? upcProduct.brand : '',
+        manufacturer: upcProduct.manufacturer !== undefined ? upcProduct.manufacturer : '',
       },
     });
     return addedProduct[0].dataValues;
@@ -164,7 +178,10 @@ const addProduct = async (barcode, userId) => {
       found: true,
     };
   }
-  const upcProduct = await findUpcProductUsingBarcode(barcode);
+  let upcProduct = await findUpcProductUsingBarcode(barcode);
+  if (!upcProduct.found) {
+    upcProduct = await findUpcItemDbProductUsingBarcode(barcode);
+  }
   if (upcProduct.found) {
     const category = await categoryData.useCategory(upcProduct.upcProduct.category.toLowerCase());
     if (upcProduct.upcProduct.title !== undefined && upcProduct.upcProduct.title.trim() === '') {

@@ -6,8 +6,18 @@ const models = require('../models/index');
 function mapItem(item) {
   const { dataValues } = item;
   // eslint-disable-next-line camelcase
-  const { id, product_id, expiration_date, created_at, quantity, initial_quantity, cost, is_used, is_expired, end_at } =
-    dataValues;
+  const {
+    id,
+    product_id,
+    expiration_date,
+    created_at,
+    quantity,
+    initial_quantity,
+    cost,
+    is_used,
+    is_expired,
+    end_at,
+  } = dataValues;
   return {
     id,
     quantity,
@@ -80,7 +90,15 @@ const getItemById = async (id) => {
 /**
  * This method is used to update an item in Item table
  */
-const updateItem = async (itemId, expirationDate, initialQuantity, quantity, cost, isUsed, isExpired) => {
+const updateItem = async (
+  itemId,
+  expirationDate,
+  initialQuantity,
+  quantity,
+  cost,
+  isUsed,
+  isExpired
+) => {
   const currentDate = new Date().toISOString();
   const updatedItem = await models.item.update(
     {
@@ -142,8 +160,8 @@ const getReport = async (userId, startDate = '', endDate = '') => {
         },
       ],
       where: {
-       // is_used: false,
-      // is_expired: false,
+        // is_used: false,
+        // is_expired: false,
         expiration_date: {
           [Op.between]: [sDate, eDate],
         },
@@ -162,8 +180,8 @@ const getReport = async (userId, startDate = '', endDate = '') => {
         },
       ],
       where: {
-       // is_used: false,
-      // is_expired: false,
+        // is_used: false,
+        // is_expired: false,
         expiration_date: {
           [Op.gte]: sDate,
         },
@@ -182,8 +200,8 @@ const getReport = async (userId, startDate = '', endDate = '') => {
         },
       ],
       where: {
-       // is_used: false,
-      // is_expired: false,
+        // is_used: false,
+        // is_expired: false,
         expiration_date: {
           [Op.lte]: eDate,
         },
