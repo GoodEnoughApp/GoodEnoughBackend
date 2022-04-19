@@ -10,6 +10,6 @@ module.exports = {
     node: true,
   },
   rules: {
-    // "no-console": "error",
+    camelcase: ['error', { properties: 'never', ignoreDestructuring: true }],
   },
 };
