@@ -133,8 +133,11 @@ const addProduct = async (barcode, userId) => {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
+    userProduct.userProduct.barcodeType = userProduct.userProduct.barcode_type;
+    userProduct.userProduct.type = 'barcode';
     delete userProduct.userProduct.category_id;
     delete userProduct.userProduct.user_id;
+    delete userProduct.userProduct.barcode_type;
     return {
       type: 'USER_PRODUCT',
       product: userProduct.userProduct,
@@ -151,8 +154,10 @@ const addProduct = async (barcode, userId) => {
       name: categoryById.categoryById.name,
     };
     userProductCreated.type = 'barcode';
+    userProductCreated.barcodeType = userProductCreated.barcode_type;
     delete userProductCreated.category_id;
     delete userProductCreated.user_id;
+    delete userProductCreated.barcode_type;
     return {
       type: 'PRODUCT',
       product: userProductCreated,
@@ -212,8 +217,10 @@ const getUserProducts = async (userId, categoryId = '') => {
       name: categoryById.categoryById.name,
     };
     allUserProducts[index].dataValues.type = 'barcode';
+    allUserProducts[index].dataValues.barcodeType = allUserProducts[index].dataValues.barcode_type;
     delete allUserProducts[index].dataValues.category_id;
     delete allUserProducts[index].dataValues.user_id;
+    delete allUserProducts[index].dataValues.barcode_type;
   }
   return { productsFound: true, allUserProducts };
 };
@@ -240,9 +247,11 @@ const getUserProductById = async (id) => {
     name: categoryById.categoryById.name,
   };
   productById.dataValues.userId = productById.dataValues.user_id;
+  productById.dataValues.barcodeType = productById.dataValues.barcode_type;
   productById.dataValues.type = 'barcode';
   delete productById.dataValues.category_id;
   delete productById.dataValues.user_id;
+  delete productById.dataValues.barcode_type;
   return { productsFound: true, productById: productById.dataValues };
 };
 
@@ -288,8 +297,10 @@ const addCustomProduct = async (
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
     };
+    addedUserProduct[0].dataValues.barcodeType = addedUserProduct[0].dataValues.barcode_type;
     delete addedUserProduct[0].dataValues.category_id;
     delete addedUserProduct[0].dataValues.user_id;
+    delete addedUserProduct[0].dataValues.barcode_type;
     return {
       customProduct: addedUserProduct[0].dataValues,
       // eslint-disable-next-line
@@ -313,6 +324,7 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
     initial_quantity: 0,
     cost: parseFloat(cost),
     is_used: false,
+    is_expired: false,
   });
   if (addedItem === null) {
     return { itemAdded: false };
