@@ -232,7 +232,7 @@ const getUserProducts = async (userId, categoryId = '') => {
     allUserProducts[index].dataValues.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
-      type: categoryById.categoryById.category_type
+      type: categoryById.categoryById.category_type,
     };
     allUserProducts[index].dataValues.type = 'barcode';
     allUserProducts[index].dataValues.barcodeType = allUserProducts[index].dataValues.barcode_type;
@@ -263,6 +263,7 @@ const getUserProductById = async (id) => {
   productById.dataValues.category = {
     id: categoryById.categoryById.id,
     name: categoryById.categoryById.name,
+    type: categoryById.categoryById.category_type,
   };
   productById.dataValues.userId = productById.dataValues.user_id;
   productById.dataValues.barcodeType = productById.dataValues.barcode_type;
