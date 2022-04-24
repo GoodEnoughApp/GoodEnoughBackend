@@ -184,9 +184,17 @@ router.post('/forgot', async (req, res) => {
   }
 
   const { email } = req.body;
-
+   const user = await userData.getUser(email);
+    if (user == null)
+    {
+    return res.status(422).json({
+      status: 'error',
+      message: 'error for an invalid email id.',
+      code: 'ERROR_INVALID',
+    });
+  }
+  
   try {
-    const user = await userData.getUser(email);
     const temPass = await userData.tempPass(email);
     userData.emailSetup(
       'Good Enough - temporary password',

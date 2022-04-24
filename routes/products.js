@@ -325,7 +325,7 @@ router.put('/:productId', auth, async (req, res) => {
 router.get('/:productId', auth, async (req, res) => {
   try {
     if (!verify.checkIfValidUUID(req.params.productId)) {
-      res.status(422).json({
+      res.status(404).json({
         status: 'error',
         message: 'Incorrect Product Id',
         code: 'ERROR_INVALID_VALUES',
