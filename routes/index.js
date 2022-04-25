@@ -11,7 +11,7 @@ const constructorMethod = (app) => {
   app.use('/items', items);
   app.use('/shopping', shopping);
   app.get('/health', (_, res) => {
-    res.send({ success: false });
+    res.send({ success: true });
   });
   app.use('*', (req, res) => {
     res.sendStatus(404);
