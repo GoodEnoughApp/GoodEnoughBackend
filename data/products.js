@@ -7,6 +7,11 @@ require('pg').defaults.parseInt8 = true;
 const baseURL = 'https://api.upcdatabase.org/product';
 const baseURLItemDb = 'https://api.upcitemdb.com/prod/trial/lookup?upc=';
 
+function renameKey(obj, oldKey, newKey) {
+  obj[newKey] = obj[oldKey];
+  delete obj[oldKey];
+}
+
 /**
  * This method is used to find product in user_product table using barcode as a param
  */
@@ -315,6 +320,7 @@ const addCustomProduct = async (
     addedUserProduct[0].dataValues.category = {
       id: categoryById.categoryById.id,
       name: categoryById.categoryById.name,
+      type: categoryById.categoryById.category_type,
     };
     addedUserProduct[0].dataValues.barcodeType = addedUserProduct[0].dataValues.barcode_type;
     delete addedUserProduct[0].dataValues.category_id;
@@ -348,6 +354,13 @@ const addToItem = async (expirationDate, quantity, cost, productId) => {
   if (addedItem === null) {
     return { itemAdded: false };
   }
+  renameKey(addedItem.dataValues, 'product_id', 'productId');
+  renameKey(addedItem.dataValues, 'expiration_date', 'expirationDate');
+  renameKey(addedItem.dataValues, 'created_at', 'createdAt');
+  renameKey(addedItem.dataValues, 'initial_quantity', 'initialQuantity');
+  renameKey(addedItem.dataValues, 'is_expired', 'isExpired');
+  renameKey(addedItem.dataValues, 'is_used', 'isUsed');
+  renameKey(addedItem.dataValues, 'end_at', 'endAt');
   return { itemAdded: true, addedItem: addedItem.dataValues };
 };
 
