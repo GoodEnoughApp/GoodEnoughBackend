@@ -2,6 +2,7 @@ const express = require('express');
 const auth = require('../middlewares/jwtAuth');
 const verify = require('../middlewares/validation');
 const productsData = require('../data/products');
+const categoryData = require('../data/category');
 
 const router = express.Router();
 
@@ -127,6 +128,9 @@ router.put('/custom', auth, async (req, res) => {
       errorParams.push('brand');
     }
     if (!verify.checkIfValidUUID(categoryId)) {
+      errorParams.push('categoryId');
+    }
+    if ((await categoryData.getCategoryById(categoryId)).categoryFound === false) {
       errorParams.push('categoryId');
     }
     if (errorParams.length > 0) {
@@ -256,10 +260,10 @@ router.post('/:productId', auth, async (req, res) => {
 router.put('/:productId', auth, async (req, res) => {
   try {
     if (!verify.checkIfValidUUID(req.params.productId)) {
-      res.status(400).json({
+      res.status(422).json({
         status: 'error',
-        message: 'Bad Request',
-        code: 'BAD_REQUEST',
+        message: 'Incorrect Category Id',
+        code: 'ERROR_INVALID_VALUES',
       });
       return;
     }
