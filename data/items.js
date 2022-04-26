@@ -100,14 +100,71 @@ const updateItem = async (
   isExpired
 ) => {
   const currentDate = new Date().toISOString();
-  const updatedItem = await models.item.update(
+  let updatedItem;
+  if (isUsed === undefined && isExpired === undefined) {
+     updatedItem = await models.item.update(
+      {
+        expiration_date: expirationDate,
+        quantity,
+        initial_quantity: initialQuantity,
+        cost,
+      },
+      {
+        where: {
+          id: itemId,
+        },
+      }
+    );
+  }
+  else if (isUsed !== undefined && isExpired !== undefined)
+  {
+    updatedItem = await models.item.update(
+      {
+        expiration_date: expirationDate,
+        quantity,
+        initial_quantity: initialQuantity,
+        cost,
+        is_used: isUsed,
+        is_expired: isExpired,
+        end_at: currentDate,
+      },
+      {
+        where: {
+          id: itemId,
+        },
+      }
+    );
+  }
+  else if (isUsed === undefined)
+  {
+    updatedItem = await models.item.update(
+      {
+        expiration_date: expirationDate,
+        quantity,
+        initial_quantity: initialQuantity,
+        cost,
+        // is_used: isUsed,
+        is_expired: isExpired,
+        end_at: currentDate,
+      },
+      {
+        where: {
+          id: itemId,
+        },
+      }
+    );
+  }
+
+else
+{
+  updatedItem = await models.item.update(
     {
       expiration_date: expirationDate,
       quantity,
       initial_quantity: initialQuantity,
       cost,
-      is_used: isUsed,
-      is_expired: isExpired,
+       is_used: isUsed,
+     // is_expired: isExpired,
       end_at: currentDate,
     },
     {
@@ -116,6 +173,8 @@ const updateItem = async (
       },
     }
   );
+}
+
   if (updatedItem[0] === 1) {
     const newUpdatedItem = await getItemById(itemId);
     return { itemUpdated: true, item: newUpdatedItem.itemById };
