@@ -88,13 +88,13 @@ router.put('/:itemId', auth, async (req, res) => {
     if (cost === undefined) {
       errorParams.push('cost');
     }
-    if (isUsed === undefined) {
-      errorParams.push('isUsed');
-    }
+    // if (isUsed === undefined) {
+    //   errorParams.push('isUsed');
+    // }
 
-    if (isExpired === undefined) {
-      errorParams.push('isExpired');
-    }
+    // if (isExpired === undefined) {
+    //   errorParams.push('isExpired');
+    // }
 
     if (errorParams.length > 0) {
       res.status(422).json({
@@ -116,9 +116,9 @@ router.put('/:itemId', auth, async (req, res) => {
     if (!verify.checkIsProperNumber(cost)) {
       errorParams.push('cost');
     }
-    if (!verify.validBoolean(isUsed)) {
-      errorParams.push('isUsed');
-    }
+    // if (!verify.validBoolean(isUsed)) {
+    //   errorParams.push('isUsed');
+    // }
     if (!verify.checkIfValidUUID(itemId)) {
       errorParams.push('itemId');
     }
@@ -162,7 +162,7 @@ router.put('/:itemId', auth, async (req, res) => {
       return;
     }
 
-    if (itemById.itemById.isExpired === true) {
+    if (itemById.itemById.isExpired === true || itemById.itemById.isUsed === true) {
       res.status(409).json({
         status: 'error',
         message: 'The user try to change an item that reach an end state',
