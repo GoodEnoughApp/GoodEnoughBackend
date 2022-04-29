@@ -1,0 +1,20 @@
+# Ignore artifacts:
+build
+coverage
+
+# Ignore all HTML files:
+*.html
+
+# Ignore all yml files:
+*.yml
+
+# Ignore all Handlebar files:
+*.hbs
+*.handlebars
+
+# Dependency directories
+node_modules/
+
+# Package files
+package-lock.json
+package.json

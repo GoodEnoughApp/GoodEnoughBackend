@@ -1,16 +1,23 @@
 const express = require('express');
 // const model = require('./models/index');
 require('dotenv').config();
+const cors = require('cors');
 const configRoutes = require('./routes');
 
 const app = express();
 
 app.use(express.json());
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 
-// model.users.findAll().then((data) => console.log(data));
+// model.shopping_list_item.findAll().then((data) => console.log(data));
 configRoutes(app);
 app.use(express.urlencoded({ extended: true }));
-app.listen(process.env.PORT || 5000, () => {
-  console.log("We've now got a server!");
-  console.log('Your routes will be running on http://localhost:3000');
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  // eslint-disable-next-line no-console
+  console.log(`Application running on port: ${port}`);
 });

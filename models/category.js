@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize-cockroachdb');
 
 module.exports = (sequelize) => {
-  const User = sequelize.define(
-    'user',
+  const Category = sequelize.define(
+    'category',
     {
       id: {
         type: Sequelize.UUID,
@@ -13,14 +13,9 @@ module.exports = (sequelize) => {
       name: {
         type: Sequelize.TEXT,
       },
-      email: {
-        type: Sequelize.TEXT,
-      },
-      password: {
-        type: Sequelize.TEXT,
-      },
-      is_activated: {
-        type: Sequelize.BOOLEAN,
+      category_type: {
+        type: Sequelize.ENUM('category_type'),
+        allowNull: true,
       },
     },
 
@@ -31,9 +26,9 @@ module.exports = (sequelize) => {
     }
   );
 
-  User.associate = (models) => {
-    User.hasMany(models.user_product, { foreignKey: 'id', as: 'user_id' });
+  Category.associate = (models) => {
+    Category.hasMany(models.product, { foreignKey: 'id', as: 'category_id' });
   };
 
-  return User;
+  return Category;
 };

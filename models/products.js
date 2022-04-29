@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize-cockroachdb');
 
 module.exports = (sequelize) => {
-  const User = sequelize.define(
-    'user',
+  const Product = sequelize.define(
+    'product',
     {
       id: {
         type: Sequelize.UUID,
@@ -10,16 +10,17 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: Sequelize.UUIDV4,
       },
+      barcode: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      barcode_type: {
+        type: Sequelize.TEXT,
+      },
       name: {
         type: Sequelize.TEXT,
       },
-      email: {
-        type: Sequelize.TEXT,
-      },
-      password: {
-        type: Sequelize.TEXT,
-      },
-      is_activated: {
+      category_id: {
         type: Sequelize.BOOLEAN,
       },
     },
@@ -31,9 +32,10 @@ module.exports = (sequelize) => {
     }
   );
 
-  User.associate = (models) => {
-    User.hasMany(models.user_product, { foreignKey: 'id', as: 'user_id' });
+  Product.associate = (models) => {
+    Product.belongsTo(models.category, { foreignKey: 'category_id' });
+    Product.hasOne(models.user_product, { foreignKey: 'barcode' });
   };
 
-  return User;
+  return Product;
 };
