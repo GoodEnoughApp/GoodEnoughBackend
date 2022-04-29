@@ -76,9 +76,11 @@ router.put('/:itemId', auth, async (req, res) => {
   try {
     const { expirationDate, initialQuantity, quantity, cost, isUsed, isExpired } = req.body;
     const errorParams = [];
+    /*
     if (expirationDate === undefined) {
       errorParams.push('expirationDate');
     }
+   
     if (initialQuantity === undefined) {
       errorParams.push('initialQuantity');
     }
@@ -87,7 +89,7 @@ router.put('/:itemId', auth, async (req, res) => {
     }
     if (cost === undefined) {
       errorParams.push('cost');
-    }
+    } */
     // if (isUsed === undefined) {
     //   errorParams.push('isUsed');
     // }
@@ -104,7 +106,9 @@ router.put('/:itemId', auth, async (req, res) => {
       });
       return;
     }
-    if (!verify.validIsoDate(expirationDate)) {
+    /*
+    
+    if (expirationDate && !verify.validIsoDate(expirationDate)) {
       errorParams.push('expirationDate');
     }
     if (!verify.checkIsProperNumber(initialQuantity)) {
@@ -116,6 +120,7 @@ router.put('/:itemId', auth, async (req, res) => {
     if (!verify.checkIsProperNumber(cost)) {
       errorParams.push('cost');
     }
+    */
     // if (!verify.validBoolean(isUsed)) {
     //   errorParams.push('isUsed');
     // }

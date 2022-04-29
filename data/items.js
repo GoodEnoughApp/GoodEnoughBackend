@@ -100,80 +100,23 @@ const updateItem = async (
   isExpired
 ) => {
   const currentDate = new Date().toISOString();
-  let updatedItem;
-  if (isUsed === undefined && isExpired === undefined) {
-     updatedItem = await models.item.update(
-      {
-        expiration_date: expirationDate,
-        quantity,
-        initial_quantity: initialQuantity,
-        cost,
-      },
-      {
-        where: {
-          id: itemId,
-        },
-      }
-    );
-  }
-  else if (isUsed !== undefined && isExpired !== undefined)
-  {
-    updatedItem = await models.item.update(
-      {
-        expiration_date: expirationDate,
-        quantity,
-        initial_quantity: initialQuantity,
-        cost,
-        is_used: isUsed,
-        is_expired: isExpired,
-        end_at: currentDate,
-      },
-      {
-        where: {
-          id: itemId,
-        },
-      }
-    );
-  }
-  else if (isUsed === undefined)
-  {
-    updatedItem = await models.item.update(
-      {
-        expiration_date: expirationDate,
-        quantity,
-        initial_quantity: initialQuantity,
-        cost,
-        // is_used: isUsed,
-        is_expired: isExpired,
-        end_at: currentDate,
-      },
-      {
-        where: {
-          id: itemId,
-        },
-      }
-    );
-  }
+  const model = {
+    expiration_date: expirationDate,
+    quantity,
+    initial_quantity: initialQuantity,
+    cost,
+    is_used: isUsed,
+    is_expired: isExpired,
+    end_at: isExpired || isUsed ? currentDate : undefined,
+  };
 
-else
-{
-  updatedItem = await models.item.update(
-    {
-      expiration_date: expirationDate,
-      quantity,
-      initial_quantity: initialQuantity,
-      cost,
-       is_used: isUsed,
-     // is_expired: isExpired,
-      end_at: currentDate,
+  const filterQuery = {
+    where: {
+      id: itemId,
     },
-    {
-      where: {
-        id: itemId,
-      },
-    }
-  );
-}
+  };
+
+  const updatedItem = await models.item.update(model, filterQuery);
 
   if (updatedItem[0] === 1) {
     const newUpdatedItem = await getItemById(itemId);
