@@ -1,5 +1,5 @@
 const { getCategory, getCategoryById } = require('../category');
-describe('Category', () => {
+describe.skip('Category', () => {
   let category = null;
   test('Get categories', async () => {
     const { allCategory } = await getCategory();

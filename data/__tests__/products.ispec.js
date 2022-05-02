@@ -1,5 +1,5 @@
 const { getUserProductById, getUserProducts } = require('../products');
-describe('Product', () => {
+describe.skip('Product', () => {
   let product = null;
   const userId = '85de1e0b-14ce-4b61-9fb2-377f8cd2cb36';
   test('Get products', async () => {
