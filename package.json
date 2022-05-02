@@ -9,6 +9,7 @@
     "lint:check": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "jest",
+    "test:integration": "jest --testPathPattern=ispec\\.js$",
     "start": "node app.js",
     "dev": "nodemon -r dotenv/config app.js"
   },
