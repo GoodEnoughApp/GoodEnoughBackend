@@ -39,7 +39,7 @@ const getCategoryById = async (id) => {
   if (categoryById == null) {
     return { categoryFound: false };
   }
-  return { categoryFound: true, categoryById: categoryById.dataValues };
+  return { categoryFound: true, categoryById: mapItem(categoryById) };
 };
 
 // // This method is used to insert a unique category in Category table.

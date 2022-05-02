@@ -1,11 +1,41 @@
 const axios = require('axios');
 const models = require('../models/index');
 const categoryData = require('./category');
+const { getCategory, getCategoryById } = require('./category');
 require('dotenv').config();
 require('pg').defaults.parseInt8 = true;
 
 const baseURL = 'https://api.upcdatabase.org/product';
 const baseURLItemDb = 'https://api.upcitemdb.com/prod/trial/lookup?upc=';
+
+function mapProduct(value) {
+  const { dataValues } = value;
+  const {
+    id,
+    barcode,
+    name,
+    alias,
+    description,
+    brand,
+    manufacturer,
+    barcode_type,
+    category_id,
+    user_id,
+  } = dataValues;
+  return {
+    id,
+    barcode,
+    name,
+    alias,
+    description,
+    brand,
+    manufacturer,
+    type: 'barcode',
+    barcodeType: barcode_type,
+    categoryId: category_id,
+    userId: user_id,
+  };
+}
 
 function renameKey(obj, oldKey, newKey) {
   obj[newKey] = obj[oldKey];
@@ -187,7 +217,7 @@ const addProduct = async (barcode, userId) => {
   if (!upcProduct.found) {
     upcProduct = await findUpcItemDbProductUsingBarcode(barcode);
   }
-  if (upcProduct.found) {
+  if (upcProduct.found && upcProduct.upcProduct) {
     const category = await categoryData.useCategory(upcProduct.upcProduct.category.toLowerCase());
     if (upcProduct.upcProduct.title !== undefined && upcProduct.upcProduct.title.trim() === '') {
       if (
@@ -229,54 +259,49 @@ const getUserProducts = async (userId, categoryId = '') => {
   if (allUserProducts === null) {
     return { productsFound: false };
   }
-  for (let index = 0; index < allUserProducts.length; index += 1) {
-    const tempCategoryId = allUserProducts[index].category_id;
-    // Sid code - Issue araised here when I ran the code
-    // eslint-disable-next-line no-await-in-loop
-    const categoryById = await categoryData.getCategoryById(tempCategoryId);
-    allUserProducts[index].dataValues.category = {
-      id: categoryById.categoryById.id,
-      name: categoryById.categoryById.name,
-      type: categoryById.categoryById.category_type,
-    };
-    allUserProducts[index].dataValues.type = 'barcode';
-    allUserProducts[index].dataValues.barcodeType = allUserProducts[index].dataValues.barcode_type;
-    delete allUserProducts[index].dataValues.category_id;
-    delete allUserProducts[index].dataValues.user_id;
-    delete allUserProducts[index].dataValues.barcode_type;
-  }
-  return { productsFound: true, allUserProducts };
+
+  const { allCategory } = await getCategory();
+
+  const categoryMap = allCategory.reduce((acc, category) => {
+    acc.set(category.id, category);
+    return acc;
+  }, new Map());
+
+  return {
+    productsFound: true,
+    allUserProducts: allUserProducts.map(mapProduct).map((product) => {
+      product.category = categoryMap.get(product.categoryId);
+      delete product.categoryId;
+      delete product.userId;
+      return product;
+    }),
+  };
 };
 
 /**
  * This method is used to find product in user_product table using product_id as a param
  */
-const getUserProductById = async (id) => {
+const getUserProductById = async (id, userId) => {
+  const where = {
+    id,
+    user_id: userId,
+  };
   if (!id) {
     throw new Error('Invalid or missing requirements');
   }
   const productById = await models.user_product.findOne({
-    where: {
-      id,
-    },
+    where,
   });
   if (productById === null) {
     return { productsFound: false };
   }
-  const tempCategoryId = productById.dataValues.category_id;
-  const categoryById = await categoryData.getCategoryById(tempCategoryId);
-  productById.dataValues.category = {
-    id: categoryById.categoryById.id,
-    name: categoryById.categoryById.name,
-    type: categoryById.categoryById.category_type,
-  };
-  productById.dataValues.userId = productById.dataValues.user_id;
-  productById.dataValues.barcodeType = productById.dataValues.barcode_type;
-  productById.dataValues.type = 'barcode';
-  delete productById.dataValues.category_id;
-  delete productById.dataValues.user_id;
-  delete productById.dataValues.barcode_type;
-  return { productsFound: true, productById: productById.dataValues };
+  const categoryId = productById.dataValues.category_id;
+  const product = mapProduct(productById);
+  const { categoryById } = await getCategoryById(categoryId);
+  product.category = categoryById;
+  delete product.categoryId;
+
+  return { productsFound: true, productById: product };
 };
 
 /**
