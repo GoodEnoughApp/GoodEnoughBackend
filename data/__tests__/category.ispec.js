@@ -1,12 +1,23 @@
-const { getCategory } = require('../category');
+const { getCategory, getCategoryById } = require('../category');
 describe('Category', () => {
+  let category = null;
   test('Get categories', async () => {
     const { allCategory } = await getCategory();
     const categories = allCategory;
-    for (const { id, name, type } of categories) {
+    for (const cat of categories) {
+      const { id, name, type } = cat;
+      category = cat;
       expect(typeof id).toEqual('string');
       expect(typeof name).toEqual('string');
       expect(typeof type).toEqual('string');
     }
+  });
+  test('Get category by id', async () => {
+    const { categoryById } = await getCategoryById(category.id);
+    const { id, name, type } = categoryById;
+    expect(category).toEqual(categoryById);
+    expect(typeof id).toEqual('string');
+    expect(typeof name).toEqual('string');
+    expect(typeof type).toEqual('string');
   });
 });
