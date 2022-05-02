@@ -8,46 +8,40 @@ const router = express.Router();
 
 // Upsert product using barcode
 router.put('/', auth, async (req, res) => {
+  const { userId } = req.user;
+  const { barcode } = req.body;
+  if (!verify.validString(barcode)) {
+    res.status(422).json({
+      status: 'error',
+      message: 'Missing required values',
+      code: 'ERROR_MISSING_REQUIRED_VALUES',
+    });
+    return;
+  }
+
   try {
-    const { barcode } = req.body;
-    if (!verify.validString(barcode)) {
-      res.status(422).json({
-        status: 'error',
-        message: 'Missing required values',
-        code: 'ERROR_MISSING_REQUIRED_VALUES',
-      });
-      return;
-    }
-    const decoded = req.user;
-    try {
-      const addProduct = await productsData.addProduct(barcode, decoded.userId);
-      if (addProduct.found) {
-        if (addProduct.type === 'USER_PRODUCT') {
-          res.status(200).json({ product: addProduct.product, status: 'success' });
-        }
-        // else if (addProduct.type === 'PRODUCT') {
-        //   res.status(201).json({ product: addProduct.product, status: 'success' });
-        // }
-        else {
-          res.status(201).json({ productId: addProduct.product.id, status: 'success' });
-        }
-      } else {
-        res.status(201).json({ productId: null, status: 'success' });
+    const addProduct = await productsData.addProduct(barcode, userId);
+    if (addProduct.found) {
+      if (addProduct.type === 'USER_PRODUCT') {
+        res.status(200).json({ product: addProduct.product, status: 'success' });
       }
-    } catch (error) {
-      res.status(409).json({
-        status: 'error',
-        message: error.message,
-        code: 'ERROR',
-      });
-      return;
+      // else if (addProduct.type === 'PRODUCT') {
+      //   res.status(201).json({ product: addProduct.product, status: 'success' });
+      // }
+      else {
+        res.status(201).json({ productId: addProduct.product.id, status: 'success' });
+      }
+    } else {
+      res.status(201).json({ productId: null, status: 'success' });
     }
   } catch (error) {
-    res.status(500).json({
+    console.log(error);
+    res.status(409).json({
       status: 'error',
       message: error.message,
-      code: 'ERROR_SERVER',
+      code: 'ERROR',
     });
+    return;
   }
 });
 
@@ -186,6 +180,7 @@ router.put('/custom', auth, async (req, res) => {
 // Add an item to a product
 router.post('/:productId', auth, async (req, res) => {
   try {
+    const { userId } = req.user;
     const { expirationDate, quantity, cost } = req.body;
     if (
       !verify.checkIfValidUUID(req.params.productId) ||
@@ -211,7 +206,8 @@ router.post('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const getProductDataById = await productsData.getUserProductById(req.params.productId);
+
+    const getProductDataById = await productsData.getUserProductById(req.params.productId, userId);
     if (!getProductDataById.productsFound) {
       res.status(404).json({
         status: 'error',
@@ -220,15 +216,15 @@ router.post('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const decoded = req.user;
-    if (decoded.userId !== getProductDataById.productById.userId) {
+
+    /*if (decoded.userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
         code: 'ERROR_NOT_ALLOWED',
       });
       return;
-    }
+    }*/
     try {
       const item = await productsData.addToItem(
         expirationDate,
@@ -337,7 +333,7 @@ router.get('/:productId', auth, async (req, res) => {
       return;
     }
     const { userId } = req.user;
-    const productById = await productsData.getUserProductById(req.params.productId);
+    const productById = await productsData.getUserProductById(req.params.productId, userId);
     if (productById.productsFound) {
       if (productById.productById.userId !== userId) {
         res.status(403).json({
@@ -371,6 +367,7 @@ router.get('/:productId', auth, async (req, res) => {
 
 // Delete from user product using product id
 router.delete('/:productId', auth, async (req, res) => {
+  const { userId } = req.user;
   try {
     if (!verify.checkIfValidUUID(req.params.productId)) {
       res.status(422).json({
@@ -380,7 +377,7 @@ router.delete('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const getProductDataById = await productsData.getUserProductById(req.params.productId);
+    const getProductDataById = await productsData.getUserProductById(req.params.productId, userId);
     if (!getProductDataById.productsFound) {
       res.status(404).json({
         status: 'error',
@@ -389,7 +386,7 @@ router.delete('/:productId', auth, async (req, res) => {
       });
       return;
     }
-    const decoded = req.user;
+
     if (decoded.userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',

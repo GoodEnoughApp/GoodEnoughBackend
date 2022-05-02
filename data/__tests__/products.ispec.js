@@ -19,6 +19,7 @@ describe('Product', () => {
         category,
       } = prod;
       product = prod;
+      product.userId = userId;
       expect(typeof id).toEqual('string');
       expect(typeof barcode).toEqual('string');
       expect(typeof name).toEqual('string');
@@ -34,7 +35,7 @@ describe('Product', () => {
     }
   });
   test('Get product by id', async () => {
-    const { productById } = await getUserProductById(product.id);
+    const { productById } = await getUserProductById(product.id, userId);
     expect(productById).toEqual(product);
   });
 });
