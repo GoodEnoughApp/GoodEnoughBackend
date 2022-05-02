@@ -14,10 +14,6 @@ describe('Category', () => {
   });
   test('Get category by id', async () => {
     const { categoryById } = await getCategoryById(category.id);
-    const { id, name, type } = categoryById;
-    expect(category).toEqual(categoryById);
-    expect(typeof id).toEqual('string');
-    expect(typeof name).toEqual('string');
-    expect(typeof type).toEqual('string');
+    expect(categoryById).toEqual(category);
   });
 });
