@@ -8,6 +8,7 @@ const router = express.Router();
 
 // To add shopping item
 router.post('/', auth, async (req, res) => {
+  const { userId } = req.user;
   try {
     const { productId, quantity, cost } = req.body;
     if (
@@ -33,7 +34,7 @@ router.post('/', auth, async (req, res) => {
       });
       return;
     }
-    const getProductDataById = await productsData.getUserProductById(productId);
+    const getProductDataById = await productsData.getUserProductById(productId, userId);
     if (!getProductDataById.productsFound) {
       res.status(404).json({
         status: 'error',
@@ -42,7 +43,7 @@ router.post('/', auth, async (req, res) => {
       });
       return;
     }
-    const { userId } = req.user;
+
     if (userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
@@ -137,7 +138,7 @@ router.put('/:itemId', auth, async (req, res) => {
       return;
     }
 
-    const productById = await productsData.getUserProductById(item.itemById.productId);
+    const productById = await productsData.getUserProductById(item.itemById.productId, userId);
     if (productById.productsFound) {
       if (userId !== productById.productById.userId) {
         res.status(403).json({
@@ -166,6 +167,7 @@ router.put('/:itemId', auth, async (req, res) => {
 // To get item using item id
 router.get('/:itemId', auth, async (req, res) => {
   const { itemId } = req.params;
+  const { userId } = req.user;
   if (!verify.checkIfValidUUID(itemId)) {
     res.status(422).json({
       status: 'error',
@@ -177,8 +179,10 @@ router.get('/:itemId', auth, async (req, res) => {
   try {
     const itemById = await shoppingData.getShoppingItemById(itemId);
     if (itemById.itemsFound) {
-      const { userId } = req.user;
-      const productById = await productsData.getUserProductById(itemById.itemById.productId);
+      const productById = await productsData.getUserProductById(
+        itemById.itemById.productId,
+        userId
+      );
       if (productById.productsFound) {
         if (userId !== productById.productById.userId) {
           res.status(403).json({
@@ -215,6 +219,7 @@ router.get('/:itemId', auth, async (req, res) => {
 // To delete an item
 router.delete('/:itemId', auth, async (req, res) => {
   try {
+    const { userId } = req.user;
     if (!verify.checkIfValidUUID(req.params.itemId)) {
       res.status(422).json({
         status: 'error',
@@ -233,8 +238,8 @@ router.delete('/:itemId', auth, async (req, res) => {
       });
       return;
     }
-    const { userId } = req.user;
-    const productById = await productsData.getUserProductById(itemById.itemById.productId);
+
+    const productById = await productsData.getUserProductById(itemById.itemById.productId, userId);
     if (productById.productsFound) {
       if (userId !== productById.productById.userId) {
         res.status(403).json({

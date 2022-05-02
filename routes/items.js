@@ -145,7 +145,7 @@ router.put('/:itemId', auth, async (req, res) => {
       return;
     }
     const { userId } = req.user;
-    const productById = await productsData.getUserProductById(itemById.itemById.productId);
+    const productById = await productsData.getUserProductById(itemById.itemById.productId, userId);
     if (productById.productsFound) {
       if (userId !== productById.productById.userId) {
         res.status(403).json({
@@ -199,6 +199,7 @@ router.put('/:itemId', auth, async (req, res) => {
       return;
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       status: 'error',
       message: error.message,
@@ -221,7 +222,10 @@ router.get('/:itemId', auth, async (req, res) => {
     const itemById = await itemsData.getItemById(req.params.itemId);
     if (itemById.itemsFound) {
       const { userId } = req.user;
-      const productById = await productsData.getUserProductById(itemById.itemById.productId);
+      const productById = await productsData.getUserProductById(
+        itemById.itemById.productId,
+        userId
+      );
       if (productById.productsFound) {
         if (userId !== productById.productById.userId) {
           res.status(403).json({
@@ -268,7 +272,7 @@ router.delete('/:itemId', auth, async (req, res) => {
       return;
     }
     const { userId } = req.user;
-    const productById = await productsData.getUserProductById(itemById.itemById.productId);
+    const productById = await productsData.getUserProductById(itemById.itemById.productId, userId);
 
     if (productById.productsFound) {
       if (userId !== productById.productById.userId) {
