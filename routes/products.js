@@ -41,7 +41,6 @@ router.put('/', auth, async (req, res) => {
       message: error.message,
       code: 'ERROR',
     });
-    return;
   }
 });
 
@@ -217,14 +216,14 @@ router.post('/:productId', auth, async (req, res) => {
       return;
     }
 
-    /*if (decoded.userId !== getProductDataById.productById.userId) {
+    /* if (decoded.userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
         code: 'ERROR_NOT_ALLOWED',
       });
       return;
-    }*/
+    } */
     try {
       const item = await productsData.addToItem(
         expirationDate,
@@ -387,7 +386,7 @@ router.delete('/:productId', auth, async (req, res) => {
       return;
     }
 
-    if (decoded.userId !== getProductDataById.productById.userId) {
+    if (userId !== getProductDataById.productById.userId) {
       res.status(403).json({
         status: 'error',
         message: 'Not authorized to perform that action',
