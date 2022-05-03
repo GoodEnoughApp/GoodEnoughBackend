@@ -1,11 +1,12 @@
 const { getUserProductById, getUserProducts } = require('../products');
+
 describe.skip('Product', () => {
   let product = null;
   const userId = '85de1e0b-14ce-4b61-9fb2-377f8cd2cb36';
   test('Get products', async () => {
     const { allUserProducts } = await getUserProducts(userId);
     const products = allUserProducts;
-    for (const prod of products) {
+    products.forEach((prod) => {
       const {
         id,
         barcode,
@@ -32,7 +33,7 @@ describe.skip('Product', () => {
       expect(typeof category.id).toEqual('string');
       expect(typeof category.name).toEqual('string');
       expect(typeof category.type).toEqual('string');
-    }
+    });
   });
   test('Get product by id', async () => {
     const { productById } = await getUserProductById(product.id, userId);

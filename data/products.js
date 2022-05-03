@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 const axios = require('axios');
 const models = require('../models/index');
 const categoryData = require('./category');
@@ -10,18 +11,7 @@ const baseURLItemDb = 'https://api.upcitemdb.com/prod/trial/lookup?upc=';
 
 function mapProduct(value) {
   const { dataValues } = value;
-  const {
-    id,
-    barcode,
-    name,
-    alias,
-    description,
-    brand,
-    manufacturer,
-    barcode_type,
-    category_id,
-    user_id,
-  } = dataValues;
+  const { id, barcode, name, alias, description, brand, manufacturer } = dataValues;
   return {
     id,
     barcode,
@@ -31,9 +21,9 @@ function mapProduct(value) {
     brand,
     manufacturer,
     type: 'barcode',
-    barcodeType: barcode_type,
-    categoryId: category_id,
-    userId: user_id,
+    barcodeType: dataValues.barcode_type,
+    categoryId: dataValues.category_id,
+    userId: dataValues.user_id,
   };
 }
 
