@@ -24,7 +24,6 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint:check & npm test
-      - run: npm test
     
   deploy: ## <-- this is the new stuff
     runs-on: ubuntu-latest
